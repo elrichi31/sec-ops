@@ -36,9 +36,10 @@ System UI stack (Notion's own), 14px body, 40px bold page title (32px on mobile)
 ## Charts
 
 - Series colors `--c-2xx/3xx/4xx/5xx` are validated with the dataviz validator separately for light (#fff) and dark (#191919). The light 4xx amber is below 3:1 against white, so the chart always has a legend, per-bar tooltips with values, and an sr-only table.
-- **Traffic by hour**: 24 stacked bars, 2px gaps between segments, 4px rounded top on the top segment, 3 recessive gridlines, tooltip with the per-class breakdown and total on hover/focus.
+- **HourlyBars** (traffic by status class, incidents per hour): 24 bars, stacked when multi-series, 2px gaps between segments, 4px rounded top on the top segment, 3 recessive gridlines, tooltip with the per-class breakdown and total on hover/focus.
+- **HourlyLines** (latency p50 blue / p95 red, validated pair): 2px lines on one ms axis, gaps where an hour has no data, isolated points drawn as 8px dots with a surface ring, crosshair + tooltip on hover/focus.
 - **BarList**: ranked rows with a 16%-opacity `--c-bar` fill behind the label, value right-aligned in muted tabular numerals; rows link to the filtered Solicitudes view.
-- **Stat strip** (Resumen): 5 plain figures between hairlines (26px semibold, muted label and hint), not cards.
+- **Stat strip** (Resumen): 6 plain figures (requests, error %, unique IPs, incidents, p95 latency, probes) between hairlines (26px semibold, muted label and hint), not cards.
 
 ## Motion
 

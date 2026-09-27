@@ -1,5 +1,5 @@
 # Zenlor collector: reads proxy logs, normalizes to the Zenlor fields, ships OTLP/JSON.
-# Normalized attributes: source, service, clientIp, method, path, statusCode, durationMs
+# Normalized attributes: source, service, host, clientIp, method, path, statusCode, durationMs
 # Missing log files are fine: that receiver just stays idle.
 #
 # Nginx needs a JSON access log (CF-Connecting-IP is trusted only from Cloudflare peers, checked in the backend):
@@ -46,8 +46,8 @@ processors:
           # needs accessLog.fields.headers.names.Cf-Connecting-Ip: keep (backend verifies the peer is Cloudflare)
           - set(attributes["cfConnectingIp"], attributes["request_Cf-Connecting-Ip"])
           - set(attributes["service"], attributes["ServiceName"])
-          # no router matched (scanners hitting the raw IP): show the Host they asked for
-          - set(attributes["service"], attributes["RequestHost"]) where attributes["ServiceName"] == nil
+          # Host the client asked for; with no ServiceName it was not routed (scanners, open-proxy probes)
+          - set(attributes["host"], attributes["RequestHost"])
           - set(attributes["method"], attributes["RequestMethod"])
           - set(attributes["path"], attributes["RequestPath"])
           - set(attributes["statusCode"], Int(attributes["DownstreamStatus"]))

@@ -8,7 +8,7 @@ export default class DashboardController {
     const since = new Date(Date.now() - DAY)
     const recent = () => db.from('events').where('ts', '>=', since)
 
-    const [servers, statuses, topIps, events, incidents, timeline, rules, topPaths, services, totals] =
+    const [servers, statuses, topIps, events, incidents, timeline, rules, topPaths, services, totals, methods, probes] =
       await Promise.all([
         db.from('servers').select('id', 'name', 'last_seen_at').orderBy('name'),
         recent().select('status_code').count('* as total').groupBy('status_code').orderBy('status_code'),
@@ -32,13 +32,16 @@ export default class DashboardController {
           .select('incidents.*', 'servers.name as server')
           .orderBy('incidents.created_at', 'desc')
           .limit(50),
-        // 24 hourly buckets, zero-filled, split by status class
+        // 24 hourly buckets, zero-filled: requests by status class, latency percentiles, incidents
         db.rawQuery(
           `SELECT h AS hour,
                   count(e.id) FILTER (WHERE e.status_code BETWEEN 200 AND 299) AS s2,
                   count(e.id) FILTER (WHERE e.status_code BETWEEN 300 AND 399) AS s3,
                   count(e.id) FILTER (WHERE e.status_code BETWEEN 400 AND 499) AS s4,
-                  count(e.id) FILTER (WHERE e.status_code >= 500) AS s5
+                  count(e.id) FILTER (WHERE e.status_code >= 500) AS s5,
+                  round(percentile_cont(0.5) WITHIN GROUP (ORDER BY e.duration_ms)) AS p50,
+                  round(percentile_cont(0.95) WITHIN GROUP (ORDER BY e.duration_ms)) AS p95,
+                  (SELECT count(*) FROM incidents i WHERE i.created_at >= h AND i.created_at < h + interval '1 hour') AS incidents
            FROM generate_series(date_trunc('hour', now()) - interval '23 hours', date_trunc('hour', now()), interval '1 hour') h
            LEFT JOIN events e ON e.ts >= h AND e.ts < h + interval '1 hour'
            GROUP BY h ORDER BY h`
@@ -58,7 +61,20 @@ export default class DashboardController {
           .select(db.raw('count(*) filter (where status_code >= 400) as errors'))
           .select(db.raw('count(distinct client_ip) as ips'))
           .select(db.raw('round(avg(duration_ms)) as avg_ms'))
+          .select(db.raw('round(percentile_cont(0.95) within group (order by duration_ms)) as p95_ms'))
+          .select(db.raw('count(*) filter (where service is null and host is not null) as unrouted'))
           .first(),
+        recent().whereNotNull('method').select('method').count('* as total').groupBy('method').orderBy('total', 'desc').limit(8),
+        // Requests for hosts no router serves: raw-IP scans and open-proxy probes
+        recent()
+          .whereNull('service')
+          .whereNotNull('host')
+          .select('host')
+          .count('* as total')
+          .select(db.raw('count(distinct client_ip) as ips'))
+          .groupBy('host')
+          .orderBy('total', 'desc')
+          .limit(8),
       ])
 
     return {
@@ -72,6 +88,8 @@ export default class DashboardController {
       topPaths,
       services,
       totals,
+      methods,
+      probes,
     }
   }
 

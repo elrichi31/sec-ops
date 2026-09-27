@@ -12,6 +12,8 @@ export type Summary = {
   rules: Row[];
   topPaths: Row[];
   services: Row[];
+  methods: Row[];
+  probes: Row[];
   totals: Row;
 };
 

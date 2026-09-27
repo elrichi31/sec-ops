@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Activity, CircleAlert, Clock, Globe, Hash, LayoutGrid, Server, ShieldAlert, ShieldCheck, Timer, X } from "lucide-react";
-import { BarList, Legend, TrafficChart } from "./charts";
+import type { Summary } from "@/lib/api";
+import { BarList, HourlyBars, HourlyLines, INCIDENT_SERIES, LATENCY_SERIES, Legend, STATUS_SERIES } from "./charts";
 import { Topbar } from "./shell";
 import {
   Database,
@@ -20,10 +21,6 @@ import {
   type Col,
   type Row,
 } from "./ui";
-
-type Summary = Record<"servers" | "statuses" | "topIps" | "events" | "incidents" | "timeline" | "rules" | "topPaths" | "services", Row[]> & {
-  totals: Row;
-};
 
 const hotCount = (d: Summary, now: number) =>
   d.incidents.filter((i) => now - new Date(String(i.created_at)).getTime() < HOT_MS).length;
@@ -46,7 +43,7 @@ const SeeAll = ({ href }: { href: string }) => (
 
 function Stat({ label, value, hint, tone }: { label: string; value: string; hint?: string; tone?: "red" | "green" }) {
   return (
-    <div className="min-w-0 py-3 pr-4 lg:pl-4 lg:first:pl-0">
+    <div className="min-w-0 py-3 pr-4 xl:pl-4 xl:first:pl-0">
       <p className="text-[13px] text-(--muted)">{label}</p>
       <p className="tabular mt-1 text-[26px] leading-none font-semibold tracking-[-0.02em]" style={tone ? { color: `var(--n-${tone}-fg)` } : undefined}>
         {value}
@@ -74,7 +71,6 @@ export function OverviewView({ data, fetchedAt }: { data: Summary; fetchedAt: st
   const requests = Number(t.requests ?? 0);
   const errors = Number(t.errors ?? 0);
   const incidents24 = data.rules.reduce((a, r) => a + Number(r.total), 0);
-  const online = data.servers.filter((s) => isOnline(s, now)).length;
 
   const suspect = useMemo(() => {
     const byIp = new Map<string, number>();
@@ -88,7 +84,7 @@ export function OverviewView({ data, fetchedAt }: { data: Summary; fetchedAt: st
       <main className="mx-auto w-full max-w-[1180px] px-4 pb-24 sm:px-8 lg:px-12">
         <PageTitle icon={hot.length ? ShieldAlert : ShieldCheck} title="Resumen" description="Todo lo que llegó a tus servidores en las últimas 24 horas." />
 
-        <div className="grid grid-cols-2 border-y border-(--border) sm:grid-cols-3 lg:grid-cols-5 [&>*]:border-(--border) lg:[&>*:not(:first-child)]:border-l">
+        <div className="grid grid-cols-2 border-y border-(--border) sm:grid-cols-3 xl:grid-cols-6 [&>*]:border-(--border) xl:[&>*:not(:first-child)]:border-l">
           <Stat label="Solicitudes" value={nf.format(requests)} hint="últimas 24 h" />
           <Stat
             label="Errores"
@@ -97,7 +93,8 @@ export function OverviewView({ data, fetchedAt }: { data: Summary; fetchedAt: st
           />
           <Stat label="IPs únicas" value={nf.format(Number(t.ips ?? 0))} hint="clientes distintos" />
           <Stat label="Incidentes" value={nf.format(incidents24)} hint={hot.length ? `${hot.length} en la última hora` : "ninguno en la última hora"} tone={hot.length ? "red" : undefined} />
-          <Stat label="Servidores" value={`${online}/${data.servers.length}`} hint="enviando datos" tone={data.servers.length && online < data.servers.length ? "red" : undefined} />
+          <Stat label="Latencia p95" value={t.p95_ms == null ? "—" : `${nf.format(Number(t.p95_ms))} ms`} hint={t.avg_ms == null ? "sin datos" : `media ${nf.format(Number(t.avg_ms))} ms`} />
+          <Stat label="Sondeos" value={nf.format(Number(t.unrouted ?? 0))} hint="a hosts que no sirves" />
         </div>
 
         {suspect ? (
@@ -115,11 +112,24 @@ export function OverviewView({ data, fetchedAt }: { data: Summary; fetchedAt: st
           </aside>
         )}
 
-        <Section title="Tráfico por hora" action={<Legend />} className="mt-10">
+        <Section title="Tráfico por hora" action={<Legend series={STATUS_SERIES} />} className="mt-10">
           <div className="pt-12">
-            <TrafficChart rows={data.timeline} />
+            <HourlyBars rows={data.timeline} series={STATUS_SERIES} caption="Solicitudes por hora y clase de estado" />
           </div>
         </Section>
+
+        <div className="mt-10 grid gap-10 lg:grid-cols-2">
+          <Section title="Incidentes por hora">
+            <div className="pt-12">
+              <HourlyBars rows={data.timeline} series={INCIDENT_SERIES} caption="Incidentes por hora" height={140} />
+            </div>
+          </Section>
+          <Section title="Latencia por hora" action={<Legend series={LATENCY_SERIES} />}>
+            <div className="pt-12">
+              <HourlyLines rows={data.timeline} series={LATENCY_SERIES} caption="Latencia p50 y p95 por hora, en milisegundos" unit=" ms" height={140} />
+            </div>
+          </Section>
+        </div>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-2">
           <Section title="Incidentes por regla · 24 h" action={<SeeAll href="/incidentes" />}>
@@ -131,8 +141,28 @@ export function OverviewView({ data, fetchedAt }: { data: Summary; fetchedAt: st
           <Section title="IPs más activas" action={<SeeAll href="/ips" />}>
             <BarList rows={data.topIps.slice(0, 8)} mono empty="Sin tráfico en 24 horas." label={(r) => String(r.client_ip)} href={(r) => `/solicitudes?q=${encodeURIComponent(String(r.client_ip))}`} />
           </Section>
-          <Section title="Servicios con más tráfico">
-            <BarList rows={data.services} empty="Sin tráfico en 24 horas." label={(r) => <span title={String(r.service)}>{serviceName(r.service)}</span>} />
+          <Section title="Sondeos a hosts ajenos">
+            <BarList
+              rows={data.probes}
+              mono
+              empty="Nadie pidió hosts que no sirves."
+              label={(r) => String(r.host)}
+              hint={(r) => `${nf.format(Number(r.ips))} IP${Number(r.ips) === 1 ? "" : "s"}`}
+              href={(r) => `/solicitudes?q=${encodeURIComponent(String(r.host))}`}
+            />
+          </Section>
+          <Section title="Tus servicios">
+            <BarList rows={data.services} empty="Sin tráfico enrutado en 24 horas." label={(r) => <span title={String(r.service)}>{serviceName(r.service)}</span>} />
+          </Section>
+          <Section title="Códigos HTTP">
+            <BarList
+              rows={data.statuses.filter((s) => s.status_code != null).sort((a, b) => Number(b.total) - Number(a.total)).slice(0, 8)}
+              empty="Sin tráfico en 24 horas."
+              label={(r) => <Tag tone={statusTone(Number(r.status_code))}>{String(r.status_code)}</Tag>}
+            />
+          </Section>
+          <Section title="Métodos">
+            <BarList rows={data.methods} mono empty="Sin tráfico en 24 horas." label={(r) => String(r.method)} />
           </Section>
         </div>
 
@@ -202,7 +232,10 @@ export function EventsView({ data, fetchedAt, q, results }: { data: Summary; fet
             { key: "method", label: "Método", icon: Hash, render: (r) => <Mono>{r.method}</Mono> },
             { key: "path", label: "Ruta", icon: Globe, render: (r) => <span className="mono block max-w-[340px] truncate" title={String(r.path ?? "")}>{r.path ?? "—"}</span> },
             { key: "client_ip", label: "IP", icon: Hash, render: (r) => <Mono>{r.client_ip}</Mono> },
-            { key: "service", label: "Servicio", icon: Server, render: (r) => <span title={String(r.service ?? "")}>{serviceName(r.service)}</span> },
+            { key: "service", label: "Servicio", icon: Server, render: (r) =>
+              r.service ? <span title={String(r.service)}>{serviceName(r.service)}</span>
+              : r.host ? <span className="inline-flex items-center gap-1.5"><Tag tone="gray">sin ruta</Tag><span className="mono text-(--muted)">{r.host}</span></span>
+              : "—" },
             { key: "duration_ms", label: "Duración", icon: Timer, align: "right", render: (r) => (r.duration_ms == null ? "—" : <span className="tabular text-(--muted)">{nf.format(Number(r.duration_ms))} ms</span>) },
           ]}
         />

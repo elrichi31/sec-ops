@@ -39,6 +39,7 @@ export default class IngestController {
             server_id: server.id,
             source: str(a.source, 64) ?? 'unknown',
             service: str(a.service ?? a['service.name'], 255),
+            host: str(a.host, 255),
             client_ip: resolveClientIp(str(a.clientIp, 64), str(a.cfConnectingIp, 64)),
             method: str(a.method, 16),
             path: str(a.path),

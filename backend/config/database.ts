@@ -19,6 +19,8 @@ const dbConfig = defineConfig({
         naturalSort: true,
         paths: ['database/migrations'],
       },
+      // Off: the DB also holds Better Auth tables (user, session...) that would clash with generated schemas
+      schemaGeneration: { enabled: false },
       debug: app.inDev,
     },
   },
