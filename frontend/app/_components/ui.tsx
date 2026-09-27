@@ -1,6 +1,7 @@
 "use client";
 
 import { Table } from "@heroui/react";
+import type { LucideIcon } from "lucide-react";
 
 export type Val = string | number | null;
 export type Row = Record<string, Val>;
@@ -88,21 +89,25 @@ export function PageTitle({ title, description }: { title: string; description: 
   );
 }
 
-export type Col = { key: string; label: string; render: (r: Row) => React.ReactNode; align?: "right" };
+export type Col = { key: string; label: string; icon?: LucideIcon; render: (r: Row) => React.ReactNode; align?: "right" };
 
-export function Database({ label, rows, cols, empty }: { label: string; rows: Row[]; cols: Col[]; empty: string }) {
+/** `fill`: grow to the parent's remaining height and scroll inside, with a sticky header. */
+export function Database({ label, rows, cols, empty, fill }: { label: string; rows: Row[]; cols: Col[]; empty: string; fill?: boolean }) {
   return (
-    <Table variant="secondary" className="panel overflow-hidden p-0">
-      <Table.ScrollContainer>
+    <Table variant="secondary" className={`panel overflow-hidden p-0 ${fill ? "flex min-h-0 flex-1 flex-col" : ""}`}>
+      <Table.ScrollContainer className={fill ? "min-h-0 flex-1 overflow-auto" : ""}>
         <Table.Content aria-label={label} className="min-w-full text-sm">
           <Table.Header>
             {cols.map((c, i) => (
               <Table.Column
                 key={c.key}
                 isRowHeader={i === 0}
-                className={`h-10 rounded-none border-b border-(--border) bg-transparent px-4 after:hidden text-[12px] font-semibold text-(--muted) whitespace-nowrap ${c.align === "right" ? "text-right" : "text-left"}`}
+                className={`sticky top-0 z-10 h-10 rounded-none bg-(--surface) px-4 shadow-[inset_0_-1px_0_var(--border)] after:hidden text-[12px] font-semibold text-(--muted) whitespace-nowrap ${c.align === "right" ? "text-right" : "text-left"}`}
               >
-                {c.label}
+                <span className="inline-flex items-center gap-1.5">
+                  {c.icon && <c.icon size={13} strokeWidth={2} className="shrink-0 text-(--accent)" aria-hidden />}
+                  {c.label}
+                </span>
               </Table.Column>
             ))}
           </Table.Header>

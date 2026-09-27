@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { CircleAlert, Globe, Hash, LayoutGrid, Server, ShieldAlert, ShieldCheck, X } from "lucide-react";
+import { Activity, ArrowRightLeft, Box, CircleAlert, CircleCheck, Clock, Globe, Hash, LayoutGrid, Radio, Route, Server, ShieldAlert, ShieldCheck, Swords, Timer, X } from "lucide-react";
 import type { Summary } from "@/lib/api";
 import { BarList, HourlyBars, HourlyLines, INCIDENT_SERIES, LATENCY_SERIES, Legend, STATUS_SERIES } from "./charts";
 import { Topbar } from "./shell";
@@ -54,12 +54,12 @@ function Stat({ label, value, hint, tone }: { label: string; value: string; hint
 }
 
 const incidentCols = (now: number): Col[] => [
-  { key: "created_at", label: "Cuándo", render: (r) => <When ts={r.created_at} now={now} /> },
-  { key: "rule", label: "Regla", render: (r) => <Tag tone={rule(r.rule).tone}>{rule(r.rule).label}</Tag> },
-  { key: "client_ip", label: "IP", render: (r) => <Mono>{r.client_ip}</Mono> },
-  { key: "hits", label: "Hits/min", align: "right", render: (r) => <span className="tabular">{nf.format(Number(r.hits))}</span> },
-  { key: "sample_path", label: "Ruta", render: (r) => <Mono>{r.sample_path}</Mono> },
-  { key: "server", label: "Servidor", render: (r) => String(r.server) },
+  { key: "created_at", label: "Cuándo", icon: Clock, render: (r) => <When ts={r.created_at} now={now} /> },
+  { key: "rule", label: "Regla", icon: ShieldAlert, render: (r) => <Tag tone={rule(r.rule).tone}>{rule(r.rule).label}</Tag> },
+  { key: "client_ip", label: "IP", icon: Hash, render: (r) => <Mono>{r.client_ip}</Mono> },
+  { key: "hits", label: "Hits/min", icon: Activity, align: "right", render: (r) => <span className="tabular">{nf.format(Number(r.hits))}</span> },
+  { key: "sample_path", label: "Ruta", icon: Route, render: (r) => <Mono>{r.sample_path}</Mono> },
+  { key: "server", label: "Servidor", icon: Server, render: (r) => String(r.server) },
 ];
 
 /* ---------- Resumen ---------- */
@@ -81,7 +81,7 @@ export function OverviewView({ data, fetchedAt }: { data: Summary; fetchedAt: st
   return (
     <>
       <Topbar page="Resumen" icon={LayoutGrid} hot={hot.length} />
-      <main className="mx-auto w-full max-w-[1180px] px-4 pb-24 sm:px-8 lg:px-12">
+      <main className="w-full px-4 pb-24 sm:px-6">
         <PageTitle title="Resumen" description="Todo lo que llegó a tus servidores en las últimas 24 horas." />
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
@@ -185,9 +185,9 @@ export function IncidentsView({ data, fetchedAt }: { data: Summary; fetchedAt: s
   return (
     <>
       <Topbar page="Incidentes" icon={ShieldAlert} hot={hotCount(data, now)} />
-      <main className="mx-auto w-full max-w-[1180px] px-4 pb-24 sm:px-8 lg:px-12">
+      <main className="flex h-[calc(100dvh-4rem)] min-h-[32rem] w-full flex-col px-4 pb-4 sm:px-6">
         <PageTitle title="Incidentes" description="Reglas que se dispararon. Cada IP avisa una vez cada 10 minutos por regla." />
-        <Database label="Incidentes" rows={data.incidents} empty="Sin incidentes. Cuando una regla se dispare aparecerá aquí y en Telegram." cols={incidentCols(now)} />
+        <Database fill label="Incidentes" rows={data.incidents} empty="Sin incidentes. Cuando una regla se dispare aparecerá aquí y en Telegram." cols={incidentCols(now)} />
       </main>
     </>
   );
@@ -204,7 +204,7 @@ export function EventsView({ data, fetchedAt, q, results }: { data: Summary; fet
   return (
     <>
       <Topbar page="Solicitudes" icon={Globe} hot={hotCount(data, now)} />
-      <main className="mx-auto w-full max-w-[1180px] px-4 pb-24 sm:px-8 lg:px-12">
+      <main className="flex h-[calc(100dvh-4rem)] min-h-[32rem] w-full flex-col px-4 pb-4 sm:px-6">
         <PageTitle
           title="Solicitudes"
           description={q ? `Resultados para «${q}» (IP que empieza así, o host o ruta que lo contiene).` : "Las últimas 100 solicitudes de todos los servidores."}
@@ -225,22 +225,22 @@ export function EventsView({ data, fetchedAt, q, results }: { data: Summary; fet
             Solo errores (≥ 400)
           </button>
         </div>
-        <Database
+        <Database fill
           label="Solicitudes"
           rows={rows}
           empty={q ? "Nada coincide con esa búsqueda." : onlyErrors ? "Ninguna solicitud con error." : "Todavía no llegan solicitudes."}
           cols={[
-            { key: "ts", label: "Cuándo", render: (r) => <When ts={r.ts} now={now} /> },
-            { key: "status_code", label: "Código", render: (r) => (r.status_code == null ? "—" : <Tag tone={statusTone(Number(r.status_code))}>{String(r.status_code)}</Tag>) },
-            { key: "method", label: "Método", render: (r) => <Mono>{r.method}</Mono> },
-            { key: "path", label: "Ruta", render: (r) => <span className="mono block max-w-[340px] truncate" title={String(r.path ?? "")}>{r.path ?? "—"}</span> },
-            { key: "attack", label: "Ataque", render: (r) => (r.attack ? <Tag tone={rule(r.attack).tone}>{rule(r.attack).label}</Tag> : "—") },
-            { key: "client_ip", label: "IP", render: (r) => <Mono>{r.client_ip}</Mono> },
-            { key: "service", label: "Servicio", render: (r) =>
+            { key: "ts", label: "Cuándo", icon: Clock, render: (r) => <When ts={r.ts} now={now} /> },
+            { key: "status_code", label: "Código", icon: CircleCheck, render: (r) => (r.status_code == null ? "—" : <Tag tone={statusTone(Number(r.status_code))}>{String(r.status_code)}</Tag>) },
+            { key: "method", label: "Método", icon: ArrowRightLeft, render: (r) => <Mono>{r.method}</Mono> },
+            { key: "path", label: "Ruta", icon: Route, render: (r) => <span className="mono block max-w-[340px] truncate" title={String(r.path ?? "")}>{r.path ?? "—"}</span> },
+            { key: "attack", label: "Ataque", icon: Swords, render: (r) => (r.attack ? <Tag tone={rule(r.attack).tone}>{rule(r.attack).label}</Tag> : "—") },
+            { key: "client_ip", label: "IP", icon: Hash, render: (r) => <Mono>{r.client_ip}</Mono> },
+            { key: "service", label: "Servicio", icon: Box, render: (r) =>
               r.service ? <span title={String(r.service)}>{serviceName(r.service)}</span>
               : r.host ? <span className="inline-flex items-center gap-1.5"><Tag tone="gray">sin ruta</Tag><span className="mono text-(--muted)">{r.host}</span></span>
               : "—" },
-            { key: "duration_ms", label: "Duración", align: "right", render: (r) => (r.duration_ms == null ? "—" : <span className="tabular text-(--muted)">{nf.format(Number(r.duration_ms))} ms</span>) },
+            { key: "duration_ms", label: "Duración", icon: Timer, align: "right", render: (r) => (r.duration_ms == null ? "—" : <span className="tabular text-(--muted)">{nf.format(Number(r.duration_ms))} ms</span>) },
           ]}
         />
       </main>
@@ -256,29 +256,29 @@ export function IpsView({ data, fetchedAt }: { data: Summary; fetchedAt: string 
   return (
     <>
       <Topbar page="IPs" icon={Hash} hot={hotCount(data, now)} />
-      <main className="mx-auto w-full max-w-[1180px] px-4 pb-24 sm:px-8 lg:px-12">
+      <main className="flex h-[calc(100dvh-4rem)] min-h-[32rem] w-full flex-col px-4 pb-4 sm:px-6">
         <PageTitle title="IPs" description="Las 10 IPs con más solicitudes en las últimas 24 horas." />
-        <Database
+        <Database fill
           label="IPs más activas"
           rows={data.topIps.map((r) => ({ ...r, id: r.client_ip }))}
           empty="Sin IPs en las últimas 24 horas."
           cols={[
-            { key: "client_ip", label: "IP", render: (r) => (
+            { key: "client_ip", label: "IP", icon: Hash, render: (r) => (
               <Link href={`/solicitudes?q=${encodeURIComponent(String(r.client_ip))}`} className="mono text-(--accent) hover:underline">{r.client_ip}</Link>
             ) },
-            { key: "total", label: "Solicitudes", render: (r) => (
+            { key: "total", label: "Solicitudes", icon: Globe, render: (r) => (
               <span className="flex items-center gap-3">
                 <span className="tabular w-12 text-right">{nf.format(Number(r.total))}</span>
-                <span className="h-2 w-40 overflow-hidden rounded-full bg-(--n-gray-bg)">
+                <span className="h-2 w-20 overflow-hidden rounded-full sm:w-40 bg-(--n-gray-bg)">
                   <span className="block h-full rounded-full bg-(--c-bar)" style={{ width: `${(Number(r.total) / max) * 100}%` }} />
                 </span>
               </span>
             ) },
-            { key: "errors", label: "Errores", align: "right", render: (r) => {
+            { key: "errors", label: "Errores", icon: CircleAlert, align: "right", render: (r) => {
               const pct = Math.round((Number(r.errors ?? 0) / Math.max(1, Number(r.total))) * 100);
               return <span className="tabular text-(--muted)">{pct}%</span>;
             } },
-            { key: "flag", label: "Incidentes", render: (r) => {
+            { key: "flag", label: "Incidentes", icon: ShieldAlert, render: (r) => {
               const n = data.incidents.filter((i) => i.client_ip === r.client_ip).length;
               return n ? <Tag tone="red">{n}</Tag> : <span className="text-(--muted)">—</span>;
             } },
@@ -296,16 +296,16 @@ export function ServersView({ data, fetchedAt }: { data: Summary; fetchedAt: str
   return (
     <>
       <Topbar page="Servidores" icon={Server} hot={hotCount(data, now)} />
-      <main className="mx-auto w-full max-w-[1180px] px-4 pb-24 sm:px-8 lg:px-12">
+      <main className="flex h-[calc(100dvh-4rem)] min-h-[32rem] w-full flex-col px-4 pb-4 sm:px-6">
         <PageTitle title="Servidores" description="Servidores registrados con su ingest key. «Enviando» = datos en los últimos 5 minutos." />
-        <Database
+        <Database fill
           label="Servidores"
           rows={data.servers}
           empty="Ningún servidor registrado. Crea uno con: node ace server:create <nombre>"
           cols={[
-            { key: "name", label: "Nombre", render: (r) => String(r.name) },
-            { key: "state", label: "Estado", render: (r) => (isOnline(r, now) ? <Tag tone="green">Enviando</Tag> : <Tag tone="gray">Sin señal</Tag>) },
-            { key: "last_seen_at", label: "Último evento", render: (r) => <When ts={r.last_seen_at} now={now} /> },
+            { key: "name", label: "Nombre", icon: Server, render: (r) => String(r.name) },
+            { key: "state", label: "Estado", icon: Radio, render: (r) => (isOnline(r, now) ? <Tag tone="green">Enviando</Tag> : <Tag tone="gray">Sin señal</Tag>) },
+            { key: "last_seen_at", label: "Último evento", icon: Clock, render: (r) => <When ts={r.last_seen_at} now={now} /> },
           ]}
         />
       </main>
