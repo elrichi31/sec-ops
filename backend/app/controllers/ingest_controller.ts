@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import db from '@adonisjs/lucid/services/db'
+import { resolveClientIp } from '#services/client_ip'
 import type { HttpContext } from '@adonisjs/core/http'
 
 type OtlpValue = { stringValue?: string; intValue?: string | number; doubleValue?: number }
@@ -38,7 +39,7 @@ export default class IngestController {
             server_id: server.id,
             source: str(a.source, 64) ?? 'unknown',
             service: str(a.service ?? a['service.name'], 255),
-            client_ip: str(a.clientIp, 64),
+            client_ip: resolveClientIp(str(a.clientIp, 64), str(a.cfConnectingIp, 64)),
             method: str(a.method, 16),
             path: str(a.path),
             status_code: int(a.statusCode),

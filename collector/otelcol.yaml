@@ -2,13 +2,14 @@
 # Normalized attributes: source, service, clientIp, method, path, statusCode, durationMs
 # Missing log files are fine: that receiver just stays idle.
 #
-# Nginx needs a JSON access log (set_real_ip_from + real_ip_header if behind Cloudflare):
+# Nginx needs a JSON access log (CF-Connecting-IP is trusted only from Cloudflare peers, checked in the backend):
 #   log_format zenlor escape=json '{"time":"$time_iso8601","remote_addr":"$remote_addr",'
-#     '"host":"$host","method":"$request_method","uri":"$uri","status":$status,"request_time":$request_time}';
+#     '"host":"$host","method":"$request_method","uri":"$uri","status":$status,"request_time":$request_time,'
+#     '"cf_connecting_ip":"$http_cf_connecting_ip"}';
 #   access_log /var/log/nginx/zenlor.json.log zenlor;
 #
 # Traefik needs: --accesslog=true --accesslog.format=json --accesslog.filepath=/var/log/traefik/access.log
-# (plus forwardedHeaders.trustedIPs on the entrypoint if behind a proxy/CDN)
+#   --accesslog.fields.headers.names.Cf-Connecting-Ip=keep   (real client IP behind Cloudflare)
 
 receivers:
   file_log/nginx:
@@ -33,6 +34,7 @@ processors:
         conditions: ['attributes["source"] == "nginx"']
         statements:
           - set(attributes["clientIp"], attributes["remote_addr"])
+          - set(attributes["cfConnectingIp"], attributes["cf_connecting_ip"])
           - set(attributes["service"], attributes["host"])
           - set(attributes["path"], attributes["uri"])
           - set(attributes["statusCode"], Int(attributes["status"]))
@@ -41,6 +43,8 @@ processors:
         conditions: ['attributes["source"] == "traefik"']
         statements:
           - set(attributes["clientIp"], attributes["ClientHost"])
+          # needs accessLog.fields.headers.names.Cf-Connecting-Ip: keep (backend verifies the peer is Cloudflare)
+          - set(attributes["cfConnectingIp"], attributes["request_Cf-Connecting-Ip"])
           - set(attributes["service"], attributes["ServiceName"])
           - set(attributes["method"], attributes["RequestMethod"])
           - set(attributes["path"], attributes["RequestPath"])
