@@ -65,7 +65,6 @@
     "@japa/api-client": "^3.2.1",
     "@tuyau/core": "^1.2.2",
     "@vinejs/vine": "^4.4.0",
-    "better-sqlite3": "^13.0.3",
     "luxon": "^3.7.2",
     "pg": "^8.23.0",
     "reflect-metadata": "^0.2.2"
@@ -78,7 +77,6 @@
   },
   "allowScripts": {
     "@swc/core": true,
-    "better-sqlite3": true,
     "esbuild": true,
     "fsevents": true
   },

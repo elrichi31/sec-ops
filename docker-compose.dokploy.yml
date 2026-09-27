@@ -1,0 +1,62 @@
+# Zenlor Central on Dokploy (Compose app, source = this repo).
+# Env vars are set in Dokploy's Environment tab (see .env.dokploy.example).
+# Domains: frontend:3000 for the dashboard, backend:3333 for ingest from remote collectors.
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zenlor
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: zenlor
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "zenlor"]
+      interval: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      TZ: UTC
+      LOG_LEVEL: info
+      APP_KEY: ${APP_KEY}
+      APP_URL: ${APP_URL}
+      SESSION_DRIVER: cookie
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: zenlor
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: zenlor
+      DASHBOARD_TOKEN: ${DASHBOARD_TOKEN}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on: [backend]
+    environment:
+      API_URL: http://backend:3333
+      DASHBOARD_TOKEN: ${DASHBOARD_TOKEN}
+
+  # Monitors this same VM: reads Dokploy's Traefik access log + container logs.
+  collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    restart: unless-stopped
+    user: "0"
+    command: ["--config=/etc/zenlor/otelcol.yaml"]
+    depends_on: [backend]
+    environment:
+      ZENLOR_ENDPOINT: http://backend:3333
+      ZENLOR_INGEST_KEY: ${ZENLOR_INGEST_KEY}
+    volumes:
+      - ./collector/otelcol.yaml:/etc/zenlor/otelcol.yaml:ro
+      - /etc/dokploy/traefik/dynamic:/logs/traefik:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+
+volumes:
+  pgdata:
