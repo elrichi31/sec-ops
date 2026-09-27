@@ -42,6 +42,8 @@ services:
     environment:
       API_URL: http://backend:3333
       DASHBOARD_TOKEN: ${DASHBOARD_TOKEN}
+      DASHBOARD_USER: ${DASHBOARD_USER}
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
 
   # Monitors this same VM: reads Dokploy's Traefik access log + container logs.
   collector:
