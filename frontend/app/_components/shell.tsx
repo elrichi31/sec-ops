@@ -62,14 +62,14 @@ export function Shell({ user, children }: { user: { name: string; email: string 
     <ShellCtx.Provider value={{ toggle: () => (window.innerWidth < 768 ? setMobileOpen((o) => !o) : toggleCollapsed()) }}>
       <div className="flex min-h-dvh">
         {mobileOpen && (
-          <button aria-label="Cerrar menú" className="fixed inset-0 z-30 bg-black/25 md:hidden" onClick={() => setMobileOpen(false)} />
+          <button aria-label="Cerrar menú" className="fixed inset-0 z-30 bg-black/35 md:hidden" onClick={() => setMobileOpen(false)} />
         )}
         <aside
-          className={`glass fixed inset-y-2 left-2 z-40 flex w-60 shrink-0 flex-col rounded-[22px] border border-(--glass-edge) shadow-(--shadow-float) transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:sticky md:top-2 md:my-2 md:ml-2 md:h-[calc(100dvh-1rem)] md:translate-x-0 md:shadow-(--shadow-card) ${
-            mobileOpen ? "translate-x-0" : "-translate-x-[calc(100%+1rem)]"
+          className={`fixed inset-y-2 left-2 z-40 flex w-60 shrink-0 flex-col rounded-2xl border border-(--border) bg-(--surface) shadow-(--shadow-card) transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:sticky md:top-2 md:my-2 md:ml-2 md:h-[calc(100dvh-1rem)] md:translate-x-0 ${
+            mobileOpen ? "translate-x-0 shadow-(--shadow-float)" : "-translate-x-[calc(100%+1rem)]"
           } sidebar-panel`}
         >
-          <Sidebar user={user} pathname={pathname} onCollapse={toggleCollapsed} onNavigate={() => setMobileOpen(false)} />
+          <Sidebar user={user} pathname={pathname} onNavigate={() => setMobileOpen(false)} />
         </aside>
         <div className="min-w-0 flex-1">{children}</div>
       </div>
@@ -77,53 +77,20 @@ export function Shell({ user, children }: { user: { name: string; email: string 
   );
 }
 
-function Sidebar({ user, pathname, onCollapse, onNavigate }: { user: { name: string; email: string }; pathname: string; onCollapse: () => void; onNavigate: () => void }) {
-  const router = useRouter();
-  const search = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        search.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
+function Sidebar({ user, pathname, onNavigate }: { user: { name: string; email: string }; pathname: string; onNavigate: () => void }) {
   return (
     <>
-      <div className="flex h-14 items-center justify-between px-3">
-        <Link href="/" className="press flex min-w-0 items-center gap-2.5 rounded-lg px-1 py-1">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-[8px] bg-linear-to-b from-[#3b9bff] to-[#0062e0] text-white shadow-[inset_0_0.5px_0_rgba(255,255,255,0.4),0_1px_2px_rgba(0,0,0,0.15)]">
-            <ShieldCheck size={16} strokeWidth={2.25} aria-hidden />
+      <div className="flex h-14 shrink-0 items-center px-2.5">
+        <Link href="/" onClick={onNavigate} className="press flex min-w-0 items-center gap-2.5 rounded-lg px-1 py-1">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-linear-to-b from-[#3b9bff] to-[#0062e0] text-white shadow-[inset_0_0.5px_0_rgba(255,255,255,0.4),0_1px_2px_rgba(0,0,0,0.15)]">
+            <ShieldCheck size={17} strokeWidth={2.25} aria-hidden />
           </span>
-          <span className="truncate text-[15px] font-semibold tracking-[-0.01em]">Zenlor Security</span>
+          <span className="min-w-0">
+            <span className="block truncate text-[14px] leading-tight font-semibold tracking-[-0.01em]">Zenlor Security</span>
+            <span className="block truncate text-[12px] leading-tight text-(--muted)">Security Monitor</span>
+          </span>
         </Link>
-        <button type="button" onClick={onCollapse} aria-label="Ocultar barra lateral" className="press hidden rounded-full p-1.5 text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground) md:block">
-          <PanelLeft size={16} strokeWidth={1.75} aria-hidden />
-        </button>
       </div>
-
-      <form
-        role="search"
-        className="px-3 pt-1 pb-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const q = search.current?.value.trim();
-          if (q) {
-            router.push(`/solicitudes?q=${encodeURIComponent(q)}`);
-            onNavigate();
-          }
-        }}
-      >
-        <label className="flex h-8 items-center gap-2 rounded-[9px] bg-(--n-hover) px-2.5 text-sm text-(--muted) ring-(--focus)/40 transition-shadow focus-within:ring-[3px]">
-          <Search size={14} strokeWidth={2} aria-hidden />
-          <input ref={search} name="q" placeholder="Buscar IP o ruta" aria-label="Buscar IP o ruta" className="min-w-0 flex-1 bg-transparent text-(--foreground) outline-none placeholder:text-(--muted)" />
-          <kbd className="hidden font-sans text-[11px] text-(--n-faint) lg:inline">Ctrl K</kbd>
-        </label>
-      </form>
 
       <nav aria-label="Principal" className="flex-1 overflow-y-auto px-3">
         <p className="px-2 pt-2 pb-1 text-[11px] font-semibold text-(--muted)">Monitor</p>
@@ -221,6 +188,40 @@ function UserMenu({ user }: { user: { name: string; email: string } }) {
   );
 }
 
+function SearchBox() {
+  const router = useRouter();
+  const search = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        search.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  return (
+    <form
+      role="search"
+      className="min-w-0 flex-1 md:max-w-md"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const q = search.current?.value.trim();
+        if (q) router.push(`/solicitudes?q=${encodeURIComponent(q)}`);
+      }}
+    >
+      <label className="flex h-9 items-center gap-2 rounded-[10px] border border-(--border) bg-(--n-hover) px-3 text-sm text-(--muted) ring-(--focus)/40 transition-shadow focus-within:ring-[3px]">
+        <Search size={15} strokeWidth={2} aria-hidden />
+        <input ref={search} name="q" placeholder="Buscar IP, host o ruta…" aria-label="Buscar IP, host o ruta" className="min-w-0 flex-1 bg-transparent text-(--foreground) outline-none placeholder:text-(--muted)" />
+        <kbd className="hidden font-sans text-[11px] text-(--n-faint) lg:inline">Ctrl K</kbd>
+      </label>
+    </form>
+  );
+}
+
 const tick = (cb: () => void) => {
   const id = setInterval(cb, 15_000);
   return () => clearInterval(id);
@@ -273,38 +274,39 @@ export function Topbar({ page, icon: Icon, hot }: { page: string; icon: LucideIc
   }, [router]);
 
   return (
-    <header className="glass sticky top-0 z-20 flex h-14 items-center justify-between gap-3 px-3 text-sm [mask-image:linear-gradient(to_bottom,black_85%,transparent)] sm:px-5">
-      <div className="flex min-w-0 items-center gap-2">
+    <header className="glass sticky top-2 z-20 mx-2 mt-2 flex h-14 items-center justify-between gap-2 rounded-2xl border border-(--border) px-2.5 text-sm shadow-(--shadow-card) sm:gap-3">
+      <div className="flex shrink-0 items-center gap-2 lg:min-w-0 lg:flex-1">
         <button type="button" onClick={toggle} aria-label="Mostrar u ocultar barra lateral" className="press rounded-full p-1.5 text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground)">
           <Menu size={16} strokeWidth={1.75} className="md:hidden" aria-hidden />
           <PanelLeft size={16} strokeWidth={1.75} className="hidden md:block" aria-hidden />
         </button>
-        <nav aria-label="Ruta" className="flex min-w-0 items-center gap-1.5 text-(--muted)">
+        <nav aria-label="Ruta" className="hidden min-w-0 items-center gap-1.5 text-(--muted) lg:flex">
           <Icon size={15} strokeWidth={1.75} className="shrink-0" aria-hidden />
-          <Link href="/" className="hidden truncate hover:text-(--foreground) sm:inline">Security Monitor</Link>
-          <span aria-hidden className="hidden text-(--n-faint) sm:inline">›</span>
+          <Link href="/" className="truncate hover:text-(--foreground)">Security Monitor</Link>
+          <span aria-hidden className="text-(--n-faint)">›</span>
           <span className="truncate font-semibold text-(--foreground)">{page}</span>
         </nav>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1 text-[13px]">
+      <SearchBox />
+
+      <div className="flex shrink-0 items-center justify-end gap-1 text-[13px] lg:flex-1">
         {now && (
-          <span className="mr-2 hidden items-center gap-3 text-(--muted) lg:flex">
+          <span className="mr-2 hidden items-center gap-3 text-(--muted) 2xl:flex">
             <span>Local <b className="tabular font-medium text-(--foreground)">{hm(now)}</b></span>
             <span>UTC <b className="tabular font-medium text-(--foreground)">{hm(now, "UTC")}</b></span>
           </span>
         )}
-        <span className="mr-2 inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 whitespace-nowrap" style={{ background: hot ? "var(--n-red-bg)" : "var(--n-green-bg)" }}>
+        <span className="mr-1 inline-flex h-7 items-center gap-1.5 rounded-full px-2 sm:px-2.5 whitespace-nowrap" style={{ background: hot ? "var(--n-red-bg)" : "var(--n-green-bg)" }}>
           <span className={`live-dot size-1.5 rounded-full ${hot ? "bg-(--c-5xx)" : "bg-(--c-2xx)"}`} aria-hidden />
-          <span className="font-semibold" style={{ color: hot ? "var(--n-red-fg)" : "var(--n-green-fg)" }}>
+          <span className="sr-only font-semibold sm:not-sr-only" style={{ color: hot ? "var(--n-red-fg)" : "var(--n-green-fg)" }}>
             {hot ? "Bajo ataque" : "Tranquilo"}
           </span>
-          <span className="hidden text-(--muted) sm:inline">
+          <span className="hidden text-(--muted) xl:inline">
             {hot ? `${hot} incidente${hot > 1 ? "s" : ""} en 1 h` : "sin incidentes en 1 h"}
           </span>
         </span>
-        <span className="mx-1 hidden h-4 w-px bg-(--border) sm:block" aria-hidden />
-        <Link href="/incidentes" aria-label={`Incidentes${hot ? `, ${hot} en la última hora` : ""}`} className="press relative rounded-full p-1.5 text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground)">
+                <Link href="/incidentes" aria-label={`Incidentes${hot ? `, ${hot} en la última hora` : ""}`} className="press relative rounded-full p-1.5 text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground)">
           <Bell size={16} strokeWidth={1.75} aria-hidden />
           {hot > 0 && <span className="absolute top-1 right-1 size-1.5 rounded-full bg-(--c-5xx)" aria-hidden />}
         </Link>

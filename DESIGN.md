@@ -1,6 +1,6 @@
 # Design
 
-The app follows Apple's macOS/iOS language: a grouped gray ground with white inset panels, a floating translucent sidebar, a glass topbar, iOS Large Titles and system colors. Built with HeroUI v3 (Table, form fields) on Tailwind v4; tokens live in `frontend/app/globals.css`.
+The app follows Apple's macOS/iOS language: a grouped gray ground with white inset panels, a floating sidebar and a floating glass topbar aligned on an 8px inset, iOS Large Titles and system colors. Built with HeroUI v3 (Table, form fields) on Tailwind v4; tokens live in `frontend/app/globals.css`.
 
 ## Palette
 
@@ -14,7 +14,7 @@ Apple system colors. Tokens live on `:root` and `.dark`; the `.dark` class follo
 | Secondary `--muted` | #6e6e73 | #98989d |
 | Separator `--border` | rgba(60,60,67,.12) | rgba(255,255,255,.09) |
 | Accent `--accent` | #007aff | #0a84ff |
-| Material `--glass` | rgba(255,255,255,.72) | rgba(30,30,32,.72) |
+| Material `--glass` | rgba(250,250,252,.9) | rgba(28,28,30,.9) |
 
 Tag tones `--n-{gray,red,orange,yellow,green,blue}-{bg,fg}` (the `--n-` prefix is historical): a translucent tint of the system color as ground, Apple's high-contrast variant as text. They carry all meaning: red = attack/sensitive, orange = 4xx/scan, yellow = brute force, green = healthy/online, blue = 3xx/selected filter, gray = inactive.
 
@@ -25,7 +25,7 @@ San Francisco via `-apple-system` (Inter / Segoe UI elsewhere), 14px body with -
 ## Utilities
 
 - `panel`: `--surface`, 18px radius, `--shadow-card` (a hairline ring in dark). Named `panel` because HeroUI already owns `.card`.
-- `glass`: `--glass` + `backdrop-filter: blur(24px) saturate(180%)`; solid under `prefers-reduced-transparency`.
+- `glass`: `--glass` + Tailwind `backdrop-blur-[40px] backdrop-saturate-[1.8]` (a hand-written `backdrop-filter` gets stripped by the CSS pipeline); solid under `prefers-reduced-transparency`.
 - `press`: scales to 0.97 on `:active` (off under reduced motion). On every tappable control.
 
 ## Components
@@ -38,8 +38,8 @@ San Francisco via `-apple-system` (Inter / Segoe UI elsewhere), 14px body with -
 
 ## Layout
 
-- **Sidebar** (240px, floating 8px from the edges, 22px radius, `glass` + edge highlight): app-icon style logo (blue gradient squircle) + collapse button; search field (filled, focus ring; Ctrl/⌘ K, IP prefix or path substring → /solicitudes?q=); "Monitor" nav with accent icons, active item filled with the accent and white text; "Próximamente" items in `--n-faint` with a "Pronto" capsule; user row at the bottom opening a glass menu (pops in from the bottom) with Cerrar sesión. Collapsed state lives on `html[data-sidebar]`, set before paint. Under 768px it slides in as a drawer with a light scrim.
-- **Topbar** (56px, sticky, `glass`, fades out at its bottom edge instead of a hairline): sidebar toggle, page icon + breadcrumb (› separator); right side Local/UTC clocks (lg+), status capsule "Bajo ataque / Tranquilo" tinted red/green with the live dot, bell to Incidentes (red dot when hot), theme toggle. Icon buttons are circular.
+- **Sidebar** (240px, floating 8px from the edges, 16px radius, solid `--surface` + hairline border + card shadow): app-icon style logo (blue gradient squircle) with name and "Security Monitor" subtitle in a 56px header aligned with the topbar; "Monitor" nav with accent icons, active item filled with the accent and white text; "Próximamente" items in `--n-faint` with a "Pronto" capsule; user row at the bottom opening a glass menu (pops in from the bottom) with Cerrar sesión. Collapsed (via the topbar toggle) state lives on `html[data-sidebar]`, set before paint. Under 768px it slides in as a drawer with a scrim.
+- **Topbar** (56px, floating 8px from the edges, 16px radius, `glass` + hairline border, sticky): sidebar toggle and breadcrumb (lg+, › separator) left; centered search field (Ctrl/⌘ K; IP prefix, host or path substring → /solicitudes?q=); right: Local/UTC clocks (2xl+), status capsule tinted red/green with the live dot (label from sm, detail from xl), bell to Incidentes (red dot when hot), theme toggle. Icon buttons are circular.
 - Content column max 1180px, 16px gutter on mobile. Panels sit 12–16px apart. Tables scroll horizontally inside their panel; the page never does.
 - **Login**: one centered panel (26px radius, float shadow) with a 64px app icon, 44px rounded fields and a full-width accent button.
 
