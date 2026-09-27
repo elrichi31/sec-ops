@@ -1,0 +1,17 @@
+# Install on any monitored server:
+#   ZENLOR_ENDPOINT=https://central.example.com ZENLOR_INGEST_KEY=zsm_... docker compose up -d
+# Adjust the log mounts to where this server's proxy writes its logs.
+services:
+  zenlor-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    restart: unless-stopped
+    command: ["--config=/etc/zenlor/otelcol.yaml"]
+    user: "0"
+    environment:
+      ZENLOR_ENDPOINT: ${ZENLOR_ENDPOINT}
+      ZENLOR_INGEST_KEY: ${ZENLOR_INGEST_KEY}
+    volumes:
+      - ./otelcol.yaml:/etc/zenlor/otelcol.yaml:ro
+      - /var/log/nginx:/logs/nginx:ro
+      - /var/log/traefik:/logs/traefik:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro

@@ -1,0 +1,14 @@
+# Local dev database for Zenlor Central
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zenlor
+      POSTGRES_PASSWORD: zenlor
+      POSTGRES_DB: zenlor
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+
+volumes:
+  pgdata:

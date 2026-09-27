@@ -1,0 +1,77 @@
+# Zenlor collector: reads proxy logs, normalizes to the Zenlor fields, ships OTLP/JSON.
+# Normalized attributes: source, service, clientIp, method, path, statusCode, durationMs
+# Missing log files are fine: that receiver just stays idle.
+#
+# Nginx needs a JSON access log (set_real_ip_from + real_ip_header if behind Cloudflare):
+#   log_format zenlor escape=json '{"time":"$time_iso8601","remote_addr":"$remote_addr",'
+#     '"host":"$host","method":"$request_method","uri":"$uri","status":$status,"request_time":$request_time}';
+#   access_log /var/log/nginx/zenlor.json.log zenlor;
+#
+# Traefik needs: --accesslog=true --accesslog.format=json --accesslog.filepath=/var/log/traefik/access.log
+# (plus forwardedHeaders.trustedIPs on the entrypoint if behind a proxy/CDN)
+
+receivers:
+  file_log/nginx:
+    include: [/logs/nginx/*.json.log]
+    attributes: { source: nginx }
+    operators:
+      - type: json_parser
+        timestamp: { parse_from: attributes.time, layout_type: gotime, layout: "2006-01-02T15:04:05Z07:00" }
+
+  file_log/traefik:
+    include: [/logs/traefik/access.log]
+    attributes: { source: traefik }
+    operators:
+      - type: json_parser
+        timestamp: { parse_from: attributes.time, layout_type: gotime, layout: "2006-01-02T15:04:05Z07:00" }
+
+  file_log/docker:
+    include: [/var/lib/docker/containers/*/*-json.log]
+    attributes: { source: docker }
+    operators:
+      - type: container
+        format: docker
+
+processors:
+  transform:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        conditions: ['attributes["source"] == "nginx"']
+        statements:
+          - set(attributes["clientIp"], attributes["remote_addr"])
+          - set(attributes["service"], attributes["host"])
+          - set(attributes["path"], attributes["uri"])
+          - set(attributes["statusCode"], Int(attributes["status"]))
+          - set(attributes["durationMs"], Int(Double(attributes["request_time"]) * 1000))
+      - context: log
+        conditions: ['attributes["source"] == "traefik"']
+        statements:
+          - set(attributes["clientIp"], attributes["ClientHost"])
+          - set(attributes["service"], attributes["ServiceName"])
+          - set(attributes["method"], attributes["RequestMethod"])
+          - set(attributes["path"], attributes["RequestPath"])
+          - set(attributes["statusCode"], Int(attributes["DownstreamStatus"]))
+          - set(attributes["durationMs"], Int(attributes["Duration"] / 1000000))
+      - context: log
+        conditions: ['attributes["source"] == "docker"']
+        statements:
+          # ponytail: service = container log path (container id); map to names via docker API when needed
+          - set(attributes["service"], attributes["log.file.path"])
+  batch:
+    timeout: 5s
+
+exporters:
+  otlp_http:
+    endpoint: ${env:ZENLOR_ENDPOINT}
+    encoding: json
+    compression: none
+    headers:
+      Authorization: Bearer ${env:ZENLOR_INGEST_KEY}
+
+service:
+  pipelines:
+    logs:
+      receivers: [file_log/nginx, file_log/traefik, file_log/docker]
+      processors: [transform, batch]
+      exporters: [otlp_http]
