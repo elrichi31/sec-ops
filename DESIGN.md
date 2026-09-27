@@ -1,6 +1,6 @@
 # Design
 
-The dashboard is a Notion page about the infrastructure: page icon, title, property rows, a callout, and database views. Built with HeroUI v3 (Tabs, Table) on Tailwind v4, with Notion's palette mapped onto HeroUI tokens in `frontend/app/globals.css`.
+The app is a Notion workspace about the infrastructure: sidebar, breadcrumb topbar, and one page per view (icon, title, callout, database tables, charts). Built with HeroUI v3 (Table, form fields) on Tailwind v4, with Notion's palette mapped onto HeroUI tokens in `frontend/app/globals.css`.
 
 ## Palette
 
@@ -24,10 +24,8 @@ System UI stack (Notion's own), 14px body, 40px bold page title (32px on mobile)
 ## Components
 
 - **Tag**: 20px tall, 3px radius, tone bg + fg. Used for status codes, rules, server state, page status.
-- **Property row**: icon + muted label column (128px mobile, 160px desktop), value on the right.
 - **Callout**: 6px radius, tinted ground, icon left. Red when an IP leads the last hour's incidents; gray otherwise.
-- **Database view**: HeroUI `Tabs` (left-aligned, hugging content, count in muted numerals) over HeroUI `Table` variant secondary, flattened: no radius, no fill, hairline row borders, header with icon + muted label, row hover tint.
-- **Traffic bar**: 8px stacked bar of 2xx/3xx/4xx/5xx with a dot legend (count and share).
+- **Database view**: HeroUI `Table` variant secondary, flattened: no radius, no fill, hairline row borders, header with icon + muted label, row hover tint.
 
 ## Layout
 
@@ -44,4 +42,4 @@ System UI stack (Notion's own), 14px body, 40px bold page title (32px on mobile)
 
 ## Motion
 
-One moment: the live dot pulse (disabled under reduced motion). Data refreshes in place every 10s via `router.refresh()`, keeping the selected tab.
+One moment: the live dot pulse (disabled under reduced motion). Data refreshes in place every 10s via `router.refresh()`, keeping filters and scroll.
