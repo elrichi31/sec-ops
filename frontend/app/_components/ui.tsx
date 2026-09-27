@@ -1,7 +1,6 @@
 "use client";
 
 import { Table } from "@heroui/react";
-import type { LucideIcon } from "lucide-react";
 
 export type Val = string | number | null;
 export type Row = Record<string, Val>;
@@ -50,7 +49,7 @@ export const isOnline = (s: Row, now: number) =>
 export function Tag({ tone, children }: { tone: Tone; children: React.ReactNode }) {
   return (
     <span
-      className="inline-flex h-5 items-center rounded-[3px] px-1.5 text-[12.5px] leading-none whitespace-nowrap"
+      className="inline-flex h-[22px] items-center rounded-full px-2 text-[12px] leading-none font-medium whitespace-nowrap"
       style={{ background: `var(--n-${tone}-bg)`, color: `var(--n-${tone}-fg)` }}
     >
       {children}
@@ -68,21 +67,20 @@ export function When({ ts, now }: { ts: Val; now: number }) {
 
 export const Mono = ({ children }: { children: React.ReactNode }) => <span className="mono">{children ?? "—"}</span>;
 
-export function PageTitle({ icon: Icon, title, description }: { icon: LucideIcon; title: string; description: string }) {
+export function PageTitle({ title, description }: { title: string; description: string }) {
   return (
-    <div className="pt-12 pb-6 sm:pt-16">
-      <Icon size={36} strokeWidth={1.5} className="text-(--muted)" aria-hidden />
-      <h1 className="mt-4 text-[30px] leading-tight font-bold tracking-[-0.02em] text-balance sm:text-[36px]">{title}</h1>
+    <div className="pt-8 pb-6 sm:pt-10">
+      <h1 className="text-[30px] leading-[1.1] font-bold tracking-[-0.025em] text-balance sm:text-[34px]">{title}</h1>
       <p className="mt-1.5 text-[15px] text-(--muted)">{description}</p>
     </div>
   );
 }
 
-export type Col = { key: string; label: string; icon: LucideIcon; render: (r: Row) => React.ReactNode; align?: "right" };
+export type Col = { key: string; label: string; render: (r: Row) => React.ReactNode; align?: "right" };
 
 export function Database({ label, rows, cols, empty }: { label: string; rows: Row[]; cols: Col[]; empty: string }) {
   return (
-    <Table variant="secondary" className="rounded-none bg-transparent p-0">
+    <Table variant="secondary" className="panel overflow-hidden p-0">
       <Table.ScrollContainer>
         <Table.Content aria-label={label} className="min-w-full text-sm">
           <Table.Header>
@@ -90,22 +88,19 @@ export function Database({ label, rows, cols, empty }: { label: string; rows: Ro
               <Table.Column
                 key={c.key}
                 isRowHeader={i === 0}
-                className={`h-9 rounded-none border-y border-(--border) bg-transparent px-2 text-[13px] font-normal text-(--muted) whitespace-nowrap ${c.align === "right" ? "text-right" : "text-left"}`}
+                className={`h-10 rounded-none border-b border-(--border) bg-transparent px-4 after:hidden text-[12px] font-semibold text-(--muted) whitespace-nowrap ${c.align === "right" ? "text-right" : "text-left"}`}
               >
-                <span className="inline-flex items-center gap-1.5">
-                  <c.icon size={14} strokeWidth={1.75} aria-hidden />
-                  {c.label}
-                </span>
+                {c.label}
               </Table.Column>
             ))}
           </Table.Header>
           <Table.Body renderEmptyState={() => <p className="py-10 text-center text-sm text-(--muted)">{empty}</p>}>
             {rows.map((r, i) => (
-              <Table.Row key={String(r.id ?? i)} id={String(r.id ?? i)} className="hover:bg-(--n-hover)">
+              <Table.Row key={String(r.id ?? i)} id={String(r.id ?? i)} className="transition-colors hover:bg-(--n-hover) [&:last-child>td]:border-b-0">
                 {cols.map((c) => (
                   <Table.Cell
                     key={c.key}
-                    className={`h-9 rounded-none border-b border-(--border) bg-transparent px-2 whitespace-nowrap ${c.align === "right" ? "text-right" : ""}`}
+                    className={`h-11 rounded-none border-b border-(--border) bg-transparent px-4 whitespace-nowrap ${c.align === "right" ? "text-right" : ""}`}
                   >
                     {c.render(r)}
                   </Table.Cell>

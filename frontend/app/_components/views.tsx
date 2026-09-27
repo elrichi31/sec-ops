@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Activity, CircleAlert, Clock, Globe, Hash, LayoutGrid, Server, ShieldAlert, ShieldCheck, Timer, X } from "lucide-react";
+import { CircleAlert, Globe, Hash, LayoutGrid, Server, ShieldAlert, ShieldCheck, X } from "lucide-react";
 import type { Summary } from "@/lib/api";
 import { BarList, HourlyBars, HourlyLines, INCIDENT_SERIES, LATENCY_SERIES, Legend, STATUS_SERIES } from "./charts";
 import { Topbar } from "./shell";
@@ -27,9 +27,9 @@ const hotCount = (d: Summary, now: number) =>
 
 function Section({ title, action, children, className = "" }: { title: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <section className={className}>
-      <div className="mb-3 flex items-baseline justify-between gap-3 border-b border-(--border) pb-2">
-        <h2 className="text-[15px] font-semibold">{title}</h2>
+    <section className={`panel p-4 sm:p-5 ${className}`}>
+      <div className="mb-3 flex items-baseline justify-between gap-3">
+        <h2 className="text-[17px] font-semibold tracking-[-0.015em]">{title}</h2>
         {action}
       </div>
       {children}
@@ -38,14 +38,14 @@ function Section({ title, action, children, className = "" }: { title: string; a
 }
 
 const SeeAll = ({ href }: { href: string }) => (
-  <Link href={href} className="text-[13px] text-(--muted) hover:text-(--foreground)">Ver todo →</Link>
+  <Link href={href} className="press text-[13px] font-medium text-(--accent) hover:opacity-80">Ver todo ›</Link>
 );
 
 function Stat({ label, value, hint, tone }: { label: string; value: string; hint?: string; tone?: "red" | "green" }) {
   return (
-    <div className="min-w-0 py-3 pr-4 xl:pl-4 xl:first:pl-0">
-      <p className="text-[13px] text-(--muted)">{label}</p>
-      <p className="tabular mt-1 text-[26px] leading-none font-semibold tracking-[-0.02em]" style={tone ? { color: `var(--n-${tone}-fg)` } : undefined}>
+    <div className="panel min-w-0 p-4">
+      <p className="text-[13px] font-medium text-(--muted)">{label}</p>
+      <p className="rounded-num tabular mt-2 text-[28px] leading-none font-semibold tracking-[-0.02em]" style={tone ? { color: `var(--n-${tone}-fg)` } : undefined}>
         {value}
       </p>
       {hint && <p className="mt-1.5 truncate text-[12.5px] text-(--muted)">{hint}</p>}
@@ -54,12 +54,12 @@ function Stat({ label, value, hint, tone }: { label: string; value: string; hint
 }
 
 const incidentCols = (now: number): Col[] => [
-  { key: "created_at", label: "Cuándo", icon: Clock, render: (r) => <When ts={r.created_at} now={now} /> },
-  { key: "rule", label: "Regla", icon: ShieldAlert, render: (r) => <Tag tone={rule(r.rule).tone}>{rule(r.rule).label}</Tag> },
-  { key: "client_ip", label: "IP", icon: Hash, render: (r) => <Mono>{r.client_ip}</Mono> },
-  { key: "hits", label: "Hits/min", icon: Activity, align: "right", render: (r) => <span className="tabular">{nf.format(Number(r.hits))}</span> },
-  { key: "sample_path", label: "Ruta", icon: Globe, render: (r) => <Mono>{r.sample_path}</Mono> },
-  { key: "server", label: "Servidor", icon: Server, render: (r) => String(r.server) },
+  { key: "created_at", label: "Cuándo", render: (r) => <When ts={r.created_at} now={now} /> },
+  { key: "rule", label: "Regla", render: (r) => <Tag tone={rule(r.rule).tone}>{rule(r.rule).label}</Tag> },
+  { key: "client_ip", label: "IP", render: (r) => <Mono>{r.client_ip}</Mono> },
+  { key: "hits", label: "Hits/min", align: "right", render: (r) => <span className="tabular">{nf.format(Number(r.hits))}</span> },
+  { key: "sample_path", label: "Ruta", render: (r) => <Mono>{r.sample_path}</Mono> },
+  { key: "server", label: "Servidor", render: (r) => String(r.server) },
 ];
 
 /* ---------- Resumen ---------- */
@@ -82,9 +82,9 @@ export function OverviewView({ data, fetchedAt }: { data: Summary; fetchedAt: st
     <>
       <Topbar page="Resumen" icon={LayoutGrid} hot={hot.length} />
       <main className="mx-auto w-full max-w-[1180px] px-4 pb-24 sm:px-8 lg:px-12">
-        <PageTitle icon={hot.length ? ShieldAlert : ShieldCheck} title="Resumen" description="Todo lo que llegó a tus servidores en las últimas 24 horas." />
+        <PageTitle title="Resumen" description="Todo lo que llegó a tus servidores en las últimas 24 horas." />
 
-        <div className="grid grid-cols-2 border-y border-(--border) sm:grid-cols-3 xl:grid-cols-6 [&>*]:border-(--border) xl:[&>*:not(:first-child)]:border-l">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
           <Stat label="Solicitudes" value={nf.format(requests)} hint="últimas 24 h" />
           <Stat
             label="Errores"
@@ -98,27 +98,31 @@ export function OverviewView({ data, fetchedAt }: { data: Summary; fetchedAt: st
         </div>
 
         {suspect ? (
-          <aside className="mt-6 flex gap-3 rounded-md px-4 py-3.5" style={{ background: "var(--n-red-bg)" }}>
-            <CircleAlert size={20} strokeWidth={1.75} className="mt-px shrink-0" style={{ color: "var(--n-red-fg)" }} aria-hidden />
-            <p className="text-[15px] leading-relaxed">
+          <aside className="panel mt-4 flex items-start gap-3.5 p-4">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full" style={{ background: "var(--n-red-bg)", color: "var(--n-red-fg)" }}>
+              <CircleAlert size={19} strokeWidth={2} aria-hidden />
+            </span>
+            <p className="pt-1.5 text-[15px] leading-relaxed">
               La IP <span className="mono font-medium">{suspect[0]}</span> acumula <b className="tabular">{nf.format(suspect[1])}</b> solicitudes sospechosas en la última hora.{" "}
-              <Link href={`/solicitudes?q=${encodeURIComponent(suspect[0])}`} className="underline underline-offset-2">Ver su actividad</Link> y bloquéala en Cloudflare si no es tuya.
+              <Link href={`/solicitudes?q=${encodeURIComponent(suspect[0])}`} className="font-medium text-(--accent) hover:underline">Ver su actividad</Link> y bloquéala en Cloudflare si no es tuya.
             </p>
           </aside>
         ) : (
-          <aside className="mt-6 flex gap-3 rounded-md bg-(--n-callout) px-4 py-3.5">
-            <ShieldCheck size={20} strokeWidth={1.75} className="mt-px shrink-0 text-(--muted)" aria-hidden />
-            <p className="text-[15px] leading-relaxed">Nada que atender ahora. Los detectores revisan escaneos 404, rutas sensibles y fuerza bruta cada minuto.</p>
+          <aside className="panel mt-4 flex items-start gap-3.5 p-4">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full" style={{ background: "var(--n-green-bg)", color: "var(--n-green-fg)" }}>
+              <ShieldCheck size={19} strokeWidth={2} aria-hidden />
+            </span>
+            <p className="pt-1.5 text-[15px] leading-relaxed">Nada que atender ahora. Los detectores revisan escaneos 404, rutas sensibles y fuerza bruta cada minuto.</p>
           </aside>
         )}
 
-        <Section title="Tráfico por hora" action={<Legend series={STATUS_SERIES} />} className="mt-10">
+        <Section title="Tráfico por hora" action={<Legend series={STATUS_SERIES} />} className="mt-4">
           <div className="pt-12">
             <HourlyBars rows={data.timeline} series={STATUS_SERIES} caption="Solicitudes por hora y clase de estado" />
           </div>
         </Section>
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-2">
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <Section title="Incidentes por hora">
             <div className="pt-12">
               <HourlyBars rows={data.timeline} series={INCIDENT_SERIES} caption="Incidentes por hora" height={140} />
@@ -131,7 +135,7 @@ export function OverviewView({ data, fetchedAt }: { data: Summary; fetchedAt: st
           </Section>
         </div>
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-2">
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <Section title="Incidentes por regla · 24 h" action={<SeeAll href="/incidentes" />}>
             <BarList rows={data.rules} empty="Ninguna regla se disparó en 24 horas." label={(r) => <Tag tone={rule(r.rule).tone}>{rule(r.rule).label}</Tag>} />
           </Section>
@@ -166,7 +170,7 @@ export function OverviewView({ data, fetchedAt }: { data: Summary; fetchedAt: st
           </Section>
         </div>
 
-        <Section title="Últimos incidentes" action={<SeeAll href="/incidentes" />} className="mt-10">
+        <Section title="Últimos incidentes" action={<SeeAll href="/incidentes" />} className="mt-4">
           <Database label="Últimos incidentes" rows={data.incidents.slice(0, 5)} empty="Sin incidentes registrados." cols={incidentCols(now)} />
         </Section>
       </main>
@@ -182,7 +186,7 @@ export function IncidentsView({ data, fetchedAt }: { data: Summary; fetchedAt: s
     <>
       <Topbar page="Incidentes" icon={ShieldAlert} hot={hotCount(data, now)} />
       <main className="mx-auto w-full max-w-[1180px] px-4 pb-24 sm:px-8 lg:px-12">
-        <PageTitle icon={ShieldAlert} title="Incidentes" description="Reglas que se dispararon. Cada IP avisa una vez cada 10 minutos por regla." />
+        <PageTitle title="Incidentes" description="Reglas que se dispararon. Cada IP avisa una vez cada 10 minutos por regla." />
         <Database label="Incidentes" rows={data.incidents} empty="Sin incidentes. Cuando una regla se dispare aparecerá aquí y en Telegram." cols={incidentCols(now)} />
       </main>
     </>
@@ -202,13 +206,12 @@ export function EventsView({ data, fetchedAt, q, results }: { data: Summary; fet
       <Topbar page="Solicitudes" icon={Globe} hot={hotCount(data, now)} />
       <main className="mx-auto w-full max-w-[1180px] px-4 pb-24 sm:px-8 lg:px-12">
         <PageTitle
-          icon={Globe}
           title="Solicitudes"
-          description={q ? `Resultados para «${q}» (IP que empieza así o ruta que lo contiene).` : "Las últimas 100 solicitudes de todos los servidores."}
+          description={q ? `Resultados para «${q}» (IP que empieza así, o host o ruta que lo contiene).` : "Las últimas 100 solicitudes de todos los servidores."}
         />
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           {q ? (
-            <Link href="/solicitudes" className="inline-flex items-center gap-1.5 rounded-[4px] bg-(--n-blue-bg) px-2 py-1 text-[13px] text-(--n-blue-fg)">
+            <Link href="/solicitudes" className="press inline-flex h-8 items-center gap-1.5 rounded-full bg-(--n-blue-bg) px-3 text-[13px] font-medium text-(--n-blue-fg)">
               <span className="mono">{q}</span>
               <X size={13} strokeWidth={2} aria-label="Quitar filtro" />
             </Link>
@@ -217,7 +220,7 @@ export function EventsView({ data, fetchedAt, q, results }: { data: Summary; fet
             type="button"
             aria-pressed={onlyErrors}
             onClick={() => setOnlyErrors((v) => !v)}
-            className="rounded-[4px] px-2 py-1 text-[13px] text-(--muted) transition-colors hover:bg-(--n-hover) aria-pressed:bg-(--n-blue-bg) aria-pressed:text-(--n-blue-fg)"
+            className="press h-8 rounded-full bg-(--surface) px-3.5 text-[13px] font-medium shadow-(--shadow-card) hover:bg-(--n-hover) aria-pressed:bg-(--accent) aria-pressed:text-white"
           >
             Solo errores (≥ 400)
           </button>
@@ -227,16 +230,16 @@ export function EventsView({ data, fetchedAt, q, results }: { data: Summary; fet
           rows={rows}
           empty={q ? "Nada coincide con esa búsqueda." : onlyErrors ? "Ninguna solicitud con error." : "Todavía no llegan solicitudes."}
           cols={[
-            { key: "ts", label: "Cuándo", icon: Clock, render: (r) => <When ts={r.ts} now={now} /> },
-            { key: "status_code", label: "Código", icon: Activity, render: (r) => (r.status_code == null ? "—" : <Tag tone={statusTone(Number(r.status_code))}>{String(r.status_code)}</Tag>) },
-            { key: "method", label: "Método", icon: Hash, render: (r) => <Mono>{r.method}</Mono> },
-            { key: "path", label: "Ruta", icon: Globe, render: (r) => <span className="mono block max-w-[340px] truncate" title={String(r.path ?? "")}>{r.path ?? "—"}</span> },
-            { key: "client_ip", label: "IP", icon: Hash, render: (r) => <Mono>{r.client_ip}</Mono> },
-            { key: "service", label: "Servicio", icon: Server, render: (r) =>
+            { key: "ts", label: "Cuándo", render: (r) => <When ts={r.ts} now={now} /> },
+            { key: "status_code", label: "Código", render: (r) => (r.status_code == null ? "—" : <Tag tone={statusTone(Number(r.status_code))}>{String(r.status_code)}</Tag>) },
+            { key: "method", label: "Método", render: (r) => <Mono>{r.method}</Mono> },
+            { key: "path", label: "Ruta", render: (r) => <span className="mono block max-w-[340px] truncate" title={String(r.path ?? "")}>{r.path ?? "—"}</span> },
+            { key: "client_ip", label: "IP", render: (r) => <Mono>{r.client_ip}</Mono> },
+            { key: "service", label: "Servicio", render: (r) =>
               r.service ? <span title={String(r.service)}>{serviceName(r.service)}</span>
               : r.host ? <span className="inline-flex items-center gap-1.5"><Tag tone="gray">sin ruta</Tag><span className="mono text-(--muted)">{r.host}</span></span>
               : "—" },
-            { key: "duration_ms", label: "Duración", icon: Timer, align: "right", render: (r) => (r.duration_ms == null ? "—" : <span className="tabular text-(--muted)">{nf.format(Number(r.duration_ms))} ms</span>) },
+            { key: "duration_ms", label: "Duración", align: "right", render: (r) => (r.duration_ms == null ? "—" : <span className="tabular text-(--muted)">{nf.format(Number(r.duration_ms))} ms</span>) },
           ]}
         />
       </main>
@@ -253,28 +256,28 @@ export function IpsView({ data, fetchedAt }: { data: Summary; fetchedAt: string 
     <>
       <Topbar page="IPs" icon={Hash} hot={hotCount(data, now)} />
       <main className="mx-auto w-full max-w-[1180px] px-4 pb-24 sm:px-8 lg:px-12">
-        <PageTitle icon={Hash} title="IPs" description="Las 10 IPs con más solicitudes en las últimas 24 horas." />
+        <PageTitle title="IPs" description="Las 10 IPs con más solicitudes en las últimas 24 horas." />
         <Database
           label="IPs más activas"
           rows={data.topIps.map((r) => ({ ...r, id: r.client_ip }))}
           empty="Sin IPs en las últimas 24 horas."
           cols={[
-            { key: "client_ip", label: "IP", icon: Hash, render: (r) => (
-              <Link href={`/solicitudes?q=${encodeURIComponent(String(r.client_ip))}`} className="mono underline-offset-2 hover:underline">{r.client_ip}</Link>
+            { key: "client_ip", label: "IP", render: (r) => (
+              <Link href={`/solicitudes?q=${encodeURIComponent(String(r.client_ip))}`} className="mono text-(--accent) hover:underline">{r.client_ip}</Link>
             ) },
-            { key: "total", label: "Solicitudes", icon: Activity, render: (r) => (
+            { key: "total", label: "Solicitudes", render: (r) => (
               <span className="flex items-center gap-3">
                 <span className="tabular w-12 text-right">{nf.format(Number(r.total))}</span>
-                <span className="h-1.5 w-40 overflow-hidden rounded-full bg-(--n-gray-bg)">
+                <span className="h-2 w-40 overflow-hidden rounded-full bg-(--n-gray-bg)">
                   <span className="block h-full rounded-full bg-(--c-bar)" style={{ width: `${(Number(r.total) / max) * 100}%` }} />
                 </span>
               </span>
             ) },
-            { key: "errors", label: "Errores", icon: CircleAlert, align: "right", render: (r) => {
+            { key: "errors", label: "Errores", align: "right", render: (r) => {
               const pct = Math.round((Number(r.errors ?? 0) / Math.max(1, Number(r.total))) * 100);
               return <span className="tabular text-(--muted)">{pct}%</span>;
             } },
-            { key: "flag", label: "Incidentes", icon: ShieldAlert, render: (r) => {
+            { key: "flag", label: "Incidentes", render: (r) => {
               const n = data.incidents.filter((i) => i.client_ip === r.client_ip).length;
               return n ? <Tag tone="red">{n}</Tag> : <span className="text-(--muted)">—</span>;
             } },
@@ -293,15 +296,15 @@ export function ServersView({ data, fetchedAt }: { data: Summary; fetchedAt: str
     <>
       <Topbar page="Servidores" icon={Server} hot={hotCount(data, now)} />
       <main className="mx-auto w-full max-w-[1180px] px-4 pb-24 sm:px-8 lg:px-12">
-        <PageTitle icon={Server} title="Servidores" description="Servidores registrados con su ingest key. «Enviando» = datos en los últimos 5 minutos." />
+        <PageTitle title="Servidores" description="Servidores registrados con su ingest key. «Enviando» = datos en los últimos 5 minutos." />
         <Database
           label="Servidores"
           rows={data.servers}
           empty="Ningún servidor registrado. Crea uno con: node ace server:create <nombre>"
           cols={[
-            { key: "name", label: "Nombre", icon: Server, render: (r) => String(r.name) },
-            { key: "state", label: "Estado", icon: Activity, render: (r) => (isOnline(r, now) ? <Tag tone="green">Enviando</Tag> : <Tag tone="gray">Sin señal</Tag>) },
-            { key: "last_seen_at", label: "Último evento", icon: Clock, render: (r) => <When ts={r.last_seen_at} now={now} /> },
+            { key: "name", label: "Nombre", render: (r) => String(r.name) },
+            { key: "state", label: "Estado", render: (r) => (isOnline(r, now) ? <Tag tone="green">Enviando</Tag> : <Tag tone="gray">Sin señal</Tag>) },
+            { key: "last_seen_at", label: "Último evento", render: (r) => <When ts={r.last_seen_at} now={now} /> },
           ]}
         />
       </main>

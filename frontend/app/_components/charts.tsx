@@ -31,7 +31,7 @@ export function Legend({ series }: { series: Series[] }) {
     <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-(--muted)">
       {series.map((s) => (
         <li key={s.key} className="inline-flex items-center gap-1.5">
-          <span className="size-2 rounded-[2px]" style={{ background: s.color }} aria-hidden />
+          <span className="size-2 rounded-full" style={{ background: s.color }} aria-hidden />
           {s.label}
         </li>
       ))}
@@ -83,14 +83,14 @@ function Tooltip({ point, series, index, count, unit = "", total }: { point: Poi
   return (
     <div
       role="tooltip"
-      className="pointer-events-none absolute -top-2 z-10 w-40 -translate-y-full rounded-md border border-(--border) bg-(--background) px-3 py-2 text-[12.5px] shadow-[0_6px_20px_rgba(15,15,15,0.12)]"
+      className="pointer-events-none absolute -top-2 z-10 w-40 -translate-y-full glass rounded-xl border border-(--glass-edge) px-3 py-2 text-[12.5px] shadow-(--shadow-float)"
       style={{ left: `clamp(0px, calc(${((index + 0.5) / count) * 100}% - 80px), calc(100% - 160px))` }}
     >
       <p className="mb-1.5 font-medium">{hourRange(point.hour)}</p>
       {series.map((s, j) => (
         <p key={s.key} className="flex items-center justify-between gap-3 text-(--muted)">
           <span className="inline-flex items-center gap-1.5">
-            <span className="size-2 rounded-[2px]" style={{ background: s.color }} aria-hidden />
+            <span className="size-2 rounded-full" style={{ background: s.color }} aria-hidden />
             {s.label}
           </span>
           <span className="tabular text-(--foreground)">{point.values[j] == null ? "—" : `${nf.format(point.values[j]!)}${unit}`}</span>
@@ -155,7 +155,7 @@ export function HourlyBars({ rows, series, caption, height = 180 }: { rows: Row[
                   tabIndex={0}
                   aria-label={`${hourRange(d.hour)}: ${nf.format(total)}`}
                 >
-                  <div className={`absolute inset-0 rounded-[3px] ${hover === i ? "bg-(--n-hover)" : ""}`} aria-hidden />
+                  <div className={`absolute inset-0 rounded-md ${hover === i ? "bg-(--n-hover)" : ""}`} aria-hidden />
                   {d.values.map((v, s) =>
                     v ? (
                       <div
@@ -218,7 +218,7 @@ export function HourlyLines({ rows, series, caption, unit = "", height = 180 }: 
             [...new Map([...lonely(si), ...(hover !== null && points[hover].values[si] != null ? [{ i: hover, v: points[hover].values[si] }] : [])].map((m) => [m.i, m])).values()].map(({ i, v }) => (
               <span
                 key={`${s.key}-${i}`}
-                className="pointer-events-none absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-(--background)"
+                className="pointer-events-none absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-(--surface)"
                 style={{ left: `${x(i)}%`, top: y(v!), background: s.color }}
                 aria-hidden
               />
@@ -269,13 +269,13 @@ export function BarList({
               {hint && <span className="shrink-0 text-[12px] text-(--muted)">{hint(r)}</span>}
             </span>
             <span className="tabular relative z-10 pl-3 text-(--muted)">{nf.format(v)}</span>
-            <span className="absolute inset-y-[3px] left-0 rounded-r-[4px] opacity-[0.16]" style={{ width: `${(v / max) * 100}%`, background: "var(--c-bar)" }} aria-hidden />
+            <span className="absolute inset-y-[3px] left-0 rounded-md opacity-[0.14]" style={{ width: `${(v / max) * 100}%`, background: "var(--c-bar)" }} aria-hidden />
           </>
         );
         const cls = "relative flex h-8 items-center px-2 text-sm";
         return (
           <li key={i}>
-            {href ? <a href={href(r)} className={`${cls} rounded-md hover:bg-(--n-hover)`}>{inner}</a> : <div className={cls}>{inner}</div>}
+            {href ? <a href={href(r)} className={`${cls} press rounded-lg hover:bg-(--n-hover)`}>{inner}</a> : <div className={cls}>{inner}</div>}
           </li>
         );
       })}

@@ -62,11 +62,11 @@ export function Shell({ user, children }: { user: { name: string; email: string 
     <ShellCtx.Provider value={{ toggle: () => (window.innerWidth < 768 ? setMobileOpen((o) => !o) : toggleCollapsed()) }}>
       <div className="flex min-h-dvh">
         {mobileOpen && (
-          <button aria-label="Cerrar menú" className="fixed inset-0 z-30 bg-black/40 md:hidden" onClick={() => setMobileOpen(false)} />
+          <button aria-label="Cerrar menú" className="fixed inset-0 z-30 bg-black/25 md:hidden" onClick={() => setMobileOpen(false)} />
         )}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-(--border) bg-(--surface-secondary) transition-transform duration-200 ease-out md:sticky md:top-0 md:h-dvh md:translate-x-0 ${
-            mobileOpen ? "translate-x-0" : "-translate-x-full"
+          className={`glass fixed inset-y-2 left-2 z-40 flex w-60 shrink-0 flex-col rounded-[22px] border border-(--glass-edge) shadow-(--shadow-float) transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:sticky md:top-2 md:my-2 md:ml-2 md:h-[calc(100dvh-1rem)] md:translate-x-0 md:shadow-(--shadow-card) ${
+            mobileOpen ? "translate-x-0" : "-translate-x-[calc(100%+1rem)]"
           } sidebar-panel`}
         >
           <Sidebar user={user} pathname={pathname} onCollapse={toggleCollapsed} onNavigate={() => setMobileOpen(false)} />
@@ -94,14 +94,14 @@ function Sidebar({ user, pathname, onCollapse, onNavigate }: { user: { name: str
 
   return (
     <>
-      <div className="flex h-12 items-center justify-between px-3">
-        <Link href="/" className="flex min-w-0 items-center gap-2 rounded-md px-1 py-1 hover:bg-(--n-hover)">
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-[5px] bg-(--foreground) text-(--background)">
-            <ShieldCheck size={15} strokeWidth={2} aria-hidden />
+      <div className="flex h-14 items-center justify-between px-3">
+        <Link href="/" className="press flex min-w-0 items-center gap-2.5 rounded-lg px-1 py-1">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-[8px] bg-linear-to-b from-[#3b9bff] to-[#0062e0] text-white shadow-[inset_0_0.5px_0_rgba(255,255,255,0.4),0_1px_2px_rgba(0,0,0,0.15)]">
+            <ShieldCheck size={16} strokeWidth={2.25} aria-hidden />
           </span>
-          <span className="truncate text-sm font-semibold">Zenlor Security</span>
+          <span className="truncate text-[15px] font-semibold tracking-[-0.01em]">Zenlor Security</span>
         </Link>
-        <button type="button" onClick={onCollapse} aria-label="Ocultar barra lateral" className="hidden rounded-md p-1.5 text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground) md:block">
+        <button type="button" onClick={onCollapse} aria-label="Ocultar barra lateral" className="press hidden rounded-full p-1.5 text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground) md:block">
           <PanelLeft size={16} strokeWidth={1.75} aria-hidden />
         </button>
       </div>
@@ -118,16 +118,16 @@ function Sidebar({ user, pathname, onCollapse, onNavigate }: { user: { name: str
           }
         }}
       >
-        <label className="flex h-8 items-center gap-2 rounded-md border border-(--border) bg-(--background) px-2.5 text-sm text-(--muted) focus-within:border-(--focus)">
-          <Search size={14} strokeWidth={1.75} aria-hidden />
-          <input ref={search} name="q" placeholder="Buscar IP o ruta…" aria-label="Buscar IP o ruta" className="min-w-0 flex-1 bg-transparent text-(--foreground) outline-none placeholder:text-(--muted)" />
-          <kbd className="hidden rounded border border-(--border) px-1 font-sans text-[11px] lg:inline">Ctrl K</kbd>
+        <label className="flex h-8 items-center gap-2 rounded-[9px] bg-(--n-hover) px-2.5 text-sm text-(--muted) ring-(--focus)/40 transition-shadow focus-within:ring-[3px]">
+          <Search size={14} strokeWidth={2} aria-hidden />
+          <input ref={search} name="q" placeholder="Buscar IP o ruta" aria-label="Buscar IP o ruta" className="min-w-0 flex-1 bg-transparent text-(--foreground) outline-none placeholder:text-(--muted)" />
+          <kbd className="hidden font-sans text-[11px] text-(--n-faint) lg:inline">Ctrl K</kbd>
         </label>
       </form>
 
       <nav aria-label="Principal" className="flex-1 overflow-y-auto px-3">
-        <p className="px-2 pt-2 pb-1 text-[11.5px] font-medium tracking-wide text-(--muted) uppercase">Monitor</p>
-        <ul className="flex flex-col gap-px">
+        <p className="px-2 pt-2 pb-1 text-[11px] font-semibold text-(--muted)">Monitor</p>
+        <ul className="flex flex-col gap-0.5">
           {NAV.map(({ href, label, icon: Icon }) => {
             const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
@@ -136,11 +136,11 @@ function Sidebar({ user, pathname, onCollapse, onNavigate }: { user: { name: str
                   href={href}
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
-                  className={`flex h-8 items-center gap-2.5 rounded-md px-2 text-sm transition-colors ${
-                    active ? "bg-(--n-hover) font-medium text-(--foreground)" : "text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground)"
+                  className={`press flex h-8 items-center gap-2.5 rounded-[9px] px-2 text-sm ${
+                    active ? "bg-(--accent) font-medium text-white" : "text-(--foreground) hover:bg-(--n-hover)"
                   }`}
                 >
-                  <Icon size={16} strokeWidth={1.75} aria-hidden />
+                  <Icon size={16} strokeWidth={2} className={active ? "" : "text-(--accent)"} aria-hidden />
                   {label}
                 </Link>
               </li>
@@ -148,13 +148,13 @@ function Sidebar({ user, pathname, onCollapse, onNavigate }: { user: { name: str
           })}
         </ul>
 
-        <p className="px-2 pt-6 pb-1 text-[11.5px] font-medium tracking-wide text-(--muted) uppercase">Próximamente</p>
-        <ul className="flex flex-col gap-px">
+        <p className="px-2 pt-5 pb-1 text-[11px] font-semibold text-(--muted)">Próximamente</p>
+        <ul className="flex flex-col gap-0.5">
           {SOON.map(({ label, icon: Icon }) => (
             <li key={label} className="flex h-8 cursor-default items-center gap-2.5 px-2 text-sm text-(--n-faint)">
-              <Icon size={16} strokeWidth={1.75} aria-hidden />
+              <Icon size={16} strokeWidth={2} aria-hidden />
               <span className="flex-1">{label}</span>
-              <span className="text-[10.5px] font-medium tracking-wide">PRONTO</span>
+              <span className="rounded-full bg-(--n-hover) px-1.5 py-0.5 text-[10px] font-semibold">Pronto</span>
             </li>
           ))}
         </ul>
@@ -185,7 +185,7 @@ function UserMenu({ user }: { user: { name: string; email: string } }) {
   return (
     <div ref={ref} className="relative p-3">
       {open && (
-        <div role="menu" className="absolute right-3 bottom-full left-3 mb-1 rounded-lg border border-(--border) bg-(--background) p-1 shadow-[0_8px_24px_rgba(15,15,15,0.12)]">
+        <div role="menu" className="glass pop-in absolute right-3 bottom-full left-3 mb-1 rounded-[14px] border border-(--glass-edge) p-1 shadow-(--shadow-float)">
           <button
             role="menuitem"
             type="button"
@@ -193,7 +193,7 @@ function UserMenu({ user }: { user: { name: string; email: string } }) {
               await authClient.signOut();
               router.replace("/login");
             }}
-            className="flex h-8 w-full items-center gap-2 rounded-md px-2 text-sm hover:bg-(--n-hover)"
+            className="flex h-8 w-full items-center gap-2 rounded-[9px] px-2 text-sm hover:bg-(--accent) hover:text-white"
           >
             <LogOut size={15} strokeWidth={1.75} aria-hidden />
             Cerrar sesión
@@ -205,11 +205,11 @@ function UserMenu({ user }: { user: { name: string; email: string } }) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2.5 rounded-lg border border-(--border) bg-(--background) px-2.5 py-2 text-left hover:bg-(--n-hover)"
+        className="press flex w-full items-center gap-2.5 rounded-[12px] px-2 py-2 text-left hover:bg-(--n-hover)"
       >
-        <span className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-(--n-gray-bg) text-sm font-semibold">
+        <span className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-linear-to-b from-[#a1a1a6] to-[#6e6e73] text-sm font-semibold text-white">
           {user.name.slice(0, 1).toUpperCase()}
-          <span className="absolute -right-px -bottom-px size-2.5 rounded-full border-2 border-(--background) bg-(--c-2xx)" aria-hidden />
+          <span className="absolute -right-px -bottom-px size-2.5 rounded-full border-2 border-(--surface) bg-(--c-2xx)" aria-hidden />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium">{user.name}</span>
@@ -254,7 +254,7 @@ function ThemeToggle() {
           localStorage.setItem("theme", next ? "dark" : "light");
         } catch {}
       }}
-      className="rounded-md p-1.5 text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground)"
+      className="press rounded-full p-1.5 text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground)"
     >
       {dark ? <Sun size={16} strokeWidth={1.75} aria-hidden /> : <Moon size={16} strokeWidth={1.75} aria-hidden />}
     </button>
@@ -273,17 +273,17 @@ export function Topbar({ page, icon: Icon, hot }: { page: string; icon: LucideIc
   }, [router]);
 
   return (
-    <header className="sticky top-0 z-20 flex h-12 items-center justify-between gap-3 border-b border-(--border) bg-(--background)/90 px-3 text-sm backdrop-blur-sm sm:px-4">
+    <header className="glass sticky top-0 z-20 flex h-14 items-center justify-between gap-3 px-3 text-sm [mask-image:linear-gradient(to_bottom,black_85%,transparent)] sm:px-5">
       <div className="flex min-w-0 items-center gap-2">
-        <button type="button" onClick={toggle} aria-label="Mostrar u ocultar barra lateral" className="rounded-md p-1.5 text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground)">
+        <button type="button" onClick={toggle} aria-label="Mostrar u ocultar barra lateral" className="press rounded-full p-1.5 text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground)">
           <Menu size={16} strokeWidth={1.75} className="md:hidden" aria-hidden />
           <PanelLeft size={16} strokeWidth={1.75} className="hidden md:block" aria-hidden />
         </button>
         <nav aria-label="Ruta" className="flex min-w-0 items-center gap-1.5 text-(--muted)">
           <Icon size={15} strokeWidth={1.75} className="shrink-0" aria-hidden />
           <Link href="/" className="hidden truncate hover:text-(--foreground) sm:inline">Security Monitor</Link>
-          <span aria-hidden className="hidden sm:inline">/</span>
-          <span className="truncate font-medium text-(--foreground)">{page}</span>
+          <span aria-hidden className="hidden text-(--n-faint) sm:inline">›</span>
+          <span className="truncate font-semibold text-(--foreground)">{page}</span>
         </nav>
       </div>
 
@@ -294,9 +294,9 @@ export function Topbar({ page, icon: Icon, hot }: { page: string; icon: LucideIc
             <span>UTC <b className="tabular font-medium text-(--foreground)">{hm(now, "UTC")}</b></span>
           </span>
         )}
-        <span className="mr-2 inline-flex items-center gap-1.5 whitespace-nowrap">
+        <span className="mr-2 inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 whitespace-nowrap" style={{ background: hot ? "var(--n-red-bg)" : "var(--n-green-bg)" }}>
           <span className={`live-dot size-1.5 rounded-full ${hot ? "bg-(--c-5xx)" : "bg-(--c-2xx)"}`} aria-hidden />
-          <span className="font-medium" style={{ color: hot ? "var(--n-red-fg)" : "var(--n-green-fg)" }}>
+          <span className="font-semibold" style={{ color: hot ? "var(--n-red-fg)" : "var(--n-green-fg)" }}>
             {hot ? "Bajo ataque" : "Tranquilo"}
           </span>
           <span className="hidden text-(--muted) sm:inline">
@@ -304,7 +304,7 @@ export function Topbar({ page, icon: Icon, hot }: { page: string; icon: LucideIc
           </span>
         </span>
         <span className="mx-1 hidden h-4 w-px bg-(--border) sm:block" aria-hidden />
-        <Link href="/incidentes" aria-label={`Incidentes${hot ? `, ${hot} en la última hora` : ""}`} className="relative rounded-md p-1.5 text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground)">
+        <Link href="/incidentes" aria-label={`Incidentes${hot ? `, ${hot} en la última hora` : ""}`} className="press relative rounded-full p-1.5 text-(--muted) hover:bg-(--n-hover) hover:text-(--foreground)">
           <Bell size={16} strokeWidth={1.75} aria-hidden />
           {hot > 0 && <span className="absolute top-1 right-1 size-1.5 rounded-full bg-(--c-5xx)" aria-hidden />}
         </Link>

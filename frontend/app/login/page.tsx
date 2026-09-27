@@ -35,30 +35,30 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-dvh items-center justify-center px-4">
-      <div className="w-full max-w-[320px]">
-        <span className="flex size-12 items-center justify-center rounded-lg bg-(--n-gray-bg) text-(--foreground)">
-          <ShieldCheck size={26} strokeWidth={1.5} aria-hidden />
+      <div className="panel w-full max-w-[360px] rounded-[26px] px-7 pt-9 pb-7 text-center shadow-(--shadow-float)">
+        <span className="mx-auto flex size-16 items-center justify-center rounded-[18px] bg-linear-to-b from-[#3b9bff] to-[#0062e0] text-white shadow-[inset_0_0.5px_0_rgba(255,255,255,0.4),0_6px_16px_rgba(0,98,224,0.3)]">
+          <ShieldCheck size={32} strokeWidth={2} aria-hidden />
         </span>
-        <h1 className="mt-5 text-[26px] leading-tight font-bold tracking-[-0.02em]">Security Monitor</h1>
+        <h1 className="mt-5 text-[26px] leading-tight font-bold tracking-[-0.025em]">Security Monitor</h1>
         <p className="mt-1 text-[15px] text-(--muted)">Inicia sesión con tu cuenta de Zenlor Labs.</p>
 
-        <Form className="mt-7 flex flex-col gap-3.5" onSubmit={onSubmit}>
+        <Form className="mt-7 flex flex-col gap-3.5 text-left" onSubmit={onSubmit}>
           <TextField name="email" type="email" isRequired autoComplete="username" className="flex flex-col gap-1.5">
-            <Label className="text-[13px] text-(--muted)">Correo</Label>
-            <Input placeholder="tu@zenlorlabs.com" className="h-9 rounded-md text-sm" />
+            <Label className="px-1 text-[13px] font-medium text-(--muted)">Correo</Label>
+            <Input placeholder="tu@zenlorlabs.com" className="h-11 rounded-xl text-[15px]" />
           </TextField>
           <TextField name="password" type="password" isRequired autoComplete="current-password" className="flex flex-col gap-1.5">
-            <Label className="text-[13px] text-(--muted)">Contraseña</Label>
-            <Input className="h-9 rounded-md text-sm" />
+            <Label className="px-1 text-[13px] font-medium text-(--muted)">Contraseña</Label>
+            <Input className="h-11 rounded-xl text-[15px]" />
           </TextField>
 
           {error && (
-            <p role="alert" className="rounded-md px-3 py-2 text-[13px]" style={{ background: "var(--n-red-bg)", color: "var(--n-red-fg)" }}>
+            <p role="alert" className="rounded-xl px-3 py-2 text-[13px] font-medium" style={{ background: "var(--n-red-bg)", color: "var(--n-red-fg)" }}>
               {error}
             </p>
           )}
 
-          <Button type="submit" isPending={pending} className="mt-1 h-9 w-full rounded-md text-sm font-medium">
+          <Button type="submit" isPending={pending} className="press mt-2 h-11 w-full rounded-xl text-[15px] font-semibold">
             {pending ? "Entrando…" : "Continuar"}
           </Button>
         </Form>

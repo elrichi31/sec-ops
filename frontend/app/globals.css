@@ -3,66 +3,78 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Notion palette, mapped onto HeroUI tokens */
+/* Apple system palette (grouped background + white cards), mapped onto HeroUI tokens.
+   The --n-* names are kept so components didn't have to change: they are the tag tones. */
 :root {
-  --background: #ffffff;
-  --foreground: #37352f;
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
   --surface: #ffffff;
-  --surface-secondary: #f7f6f3;
-  --muted: #787774;
-  --border: rgba(55, 53, 47, 0.09);
-  --separator: rgba(55, 53, 47, 0.09);
-  --accent: #2383e2;
+  --surface-secondary: #f5f5f7;
+  --muted: #6e6e73;
+  --border: rgba(60, 60, 67, 0.12);
+  --separator: rgba(60, 60, 67, 0.12);
+  --accent: #007aff;
   --accent-foreground: #ffffff;
-  --focus: #2383e2;
+  --focus: #007aff;
 
-  --n-hover: rgba(55, 53, 47, 0.06);
-  --n-faint: rgba(55, 53, 47, 0.45);
-  --n-callout: #f1f1ef;
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.6);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04);
+  --shadow-float: 0 12px 40px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
 
-  --n-gray-bg: #f1f1ef;   --n-gray-fg: #787774;
-  --n-red-bg: #fdebec;    --n-red-fg: #b8403d;
-  --n-orange-bg: #faebdd; --n-orange-fg: #b05f14;
-  --n-yellow-bg: #fbf3db; --n-yellow-fg: #95711f;
-  --n-green-bg: #edf3ec;  --n-green-fg: #3f7658;
-  --n-blue-bg: #e7f3f8;   --n-blue-fg: #2b6f98;
+  --n-hover: rgba(0, 0, 0, 0.045);
+  --n-faint: rgba(60, 60, 67, 0.3);
+  --n-callout: #ffffff;
+
+  /* Tint + Apple's accessible (high-contrast) variant of each system color for text */
+  --n-gray-bg: rgba(120, 120, 128, 0.12);  --n-gray-fg: #6e6e73;
+  --n-red-bg: rgba(255, 59, 48, 0.12);     --n-red-fg: #d70015;
+  --n-orange-bg: rgba(255, 149, 0, 0.14);  --n-orange-fg: #c93400;
+  --n-yellow-bg: rgba(255, 204, 0, 0.2);   --n-yellow-fg: #9a6700;
+  --n-green-bg: rgba(52, 199, 89, 0.14);   --n-green-fg: #248a3d;
+  --n-blue-bg: rgba(0, 122, 255, 0.12);    --n-blue-fg: #0062cc;
 
   /* Chart series: HTTP status classes. Validated (dataviz validate_palette) on #fff. */
   --c-2xx: #2e9e5e;
   --c-3xx: #2f80d1;
   --c-4xx: #d99a13;
   --c-5xx: #d9496b;
-  --c-bar: #2f80d1;
+  --c-bar: #007aff;
 }
 
 .dark {
-  --background: #191919;
-  --foreground: rgba(255, 255, 255, 0.86);
-  --surface: #191919;
-  --surface-secondary: #202020;
-  --muted: #9b9b9b;
-  --border: rgba(255, 255, 255, 0.094);
-  --separator: rgba(255, 255, 255, 0.094);
-  --accent: #529cca;
-  --focus: #529cca;
+  --background: #000000;
+  --foreground: #f5f5f7;
+  --surface: #1c1c1e;
+  --surface-secondary: #1c1c1e;
+  --muted: #98989d;
+  --border: rgba(255, 255, 255, 0.09);
+  --separator: rgba(255, 255, 255, 0.09);
+  --accent: #0a84ff;
+  --focus: #0a84ff;
 
-  --n-hover: rgba(255, 255, 255, 0.055);
-  --n-faint: rgba(255, 255, 255, 0.45);
-  --n-callout: #252525;
+  --glass: rgba(30, 30, 32, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.08);
+  --shadow-card: 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  --shadow-float: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 0.5px rgba(255, 255, 255, 0.1);
 
-  --n-gray-bg: #2f2f2f;   --n-gray-fg: #a8a8a8;
-  --n-red-bg: #522e2a;    --n-red-fg: #f08a86;
-  --n-orange-bg: #5c3b23; --n-orange-fg: #e8a063;
-  --n-yellow-bg: #56452f; --n-yellow-fg: #dfbb6a;
-  --n-green-bg: #243d30;  --n-green-fg: #7cc29a;
-  --n-blue-bg: #143a4e;   --n-blue-fg: #7cb7e0;
+  --n-hover: rgba(255, 255, 255, 0.07);
+  --n-faint: rgba(235, 235, 245, 0.3);
+  --n-callout: #1c1c1e;
 
-  /* Validated on #191919 */
+  --n-gray-bg: rgba(142, 142, 147, 0.2);   --n-gray-fg: #aeaeb2;
+  --n-red-bg: rgba(255, 69, 58, 0.2);      --n-red-fg: #ff6961;
+  --n-orange-bg: rgba(255, 159, 10, 0.2);  --n-orange-fg: #ffb340;
+  --n-yellow-bg: rgba(255, 214, 10, 0.18); --n-yellow-fg: #ffd426;
+  --n-green-bg: rgba(48, 209, 88, 0.18);   --n-green-fg: #30db5b;
+  --n-blue-bg: rgba(10, 132, 255, 0.2);    --n-blue-fg: #409cff;
+
+  /* Validated on #191919 (close to the #1c1c1e card) */
   --c-2xx: #349a5f;
   --c-3xx: #4a8cc2;
   --c-4xx: #b08c1c;
   --c-5xx: #d9496b;
-  --c-bar: #4a8cc2;
+  --c-bar: #0a84ff;
 }
 
 html {
@@ -75,9 +87,11 @@ html.dark {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  letter-spacing: -0.006em;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "tnum" 0;
+  transition: background-color 200ms ease;
 }
 
 ::selection {
@@ -85,13 +99,35 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
+  outline: 3px solid color-mix(in srgb, var(--focus) 50%, transparent);
+  outline-offset: 1px;
 }
 
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--n-faint) transparent;
+}
+
+/* Translucent material: chrome, menus, tooltips */
+@utility glass {
+  background: var(--glass);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+/* Inset-grouped card */
+@utility panel {
+  background: var(--surface);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+}
+
+/* Instant feedback on press */
+@utility press {
+  transition: transform 120ms ease-out, background-color 150ms ease, color 150ms ease;
+  &:active {
+    transform: scale(0.97);
+  }
 }
 
 @media (min-width: 768px) {
@@ -104,8 +140,13 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* SF Pro Rounded for big figures, like Health / Fitness */
+.rounded-num {
+  font-family: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
 .mono {
-  font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
+  font-family: ui-monospace, "SF Mono", "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
   font-size: 0.85em;
 }
 
@@ -118,6 +159,25 @@ body {
   animation: live-pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.96) translateY(4px); }
+}
+
+.pop-in {
+  animation: pop-in 180ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  transform-origin: bottom center;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-dot { animation: none; }
+  .pop-in { animation: none; }
+  .press:active { transform: none; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }

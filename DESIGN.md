@@ -1,37 +1,47 @@
 # Design
 
-The app is a Notion workspace about the infrastructure: sidebar, breadcrumb topbar, and one page per view (icon, title, callout, database tables, charts). Built with HeroUI v3 (Table, form fields) on Tailwind v4, with Notion's palette mapped onto HeroUI tokens in `frontend/app/globals.css`.
+The app follows Apple's macOS/iOS language: a grouped gray ground with white inset panels, a floating translucent sidebar, a glass topbar, iOS Large Titles and system colors. Built with HeroUI v3 (Table, form fields) on Tailwind v4; tokens live in `frontend/app/globals.css`.
 
 ## Palette
 
-Neutral ground plus Notion's muted tag colors. Tokens live on `:root` and `.dark`; the `.dark` class follows the OS theme via an inline script in `layout.tsx`.
+Apple system colors. Tokens live on `:root` and `.dark`; the `.dark` class follows the OS theme via an inline script in `layout.tsx`.
 
 | Role | Light | Dark |
 |---|---|---|
-| Ground `--background` | #ffffff | #191919 |
-| Ink `--foreground` | #37352f | rgba(255,255,255,.86) |
-| Secondary `--muted` | #787774 | #9b9b9b |
-| Hairline `--border` | rgba(55,53,47,.09) | rgba(255,255,255,.094) |
-| Row hover `--n-hover` | rgba(55,53,47,.06) | rgba(255,255,255,.055) |
-| Accent `--accent` | #2383e2 | #529cca |
+| Ground `--background` | #f5f5f7 | #000000 |
+| Panel `--surface` | #ffffff | #1c1c1e |
+| Ink `--foreground` | #1d1d1f | #f5f5f7 |
+| Secondary `--muted` | #6e6e73 | #98989d |
+| Separator `--border` | rgba(60,60,67,.12) | rgba(255,255,255,.09) |
+| Accent `--accent` | #007aff | #0a84ff |
+| Material `--glass` | rgba(255,255,255,.72) | rgba(30,30,32,.72) |
 
-Tag tones `--n-{gray,red,orange,yellow,green,blue}-{bg,fg}` carry all meaning: red = attack/sensitive, orange = 4xx/scan, yellow = brute force, green = healthy/online, blue = 3xx/selected filter, gray = inactive.
+Tag tones `--n-{gray,red,orange,yellow,green,blue}-{bg,fg}` (the `--n-` prefix is historical): a translucent tint of the system color as ground, Apple's high-contrast variant as text. They carry all meaning: red = attack/sensitive, orange = 4xx/scan, yellow = brute force, green = healthy/online, blue = 3xx/selected filter, gray = inactive.
 
 ## Type
 
-System UI stack (Notion's own), 14px body, 40px bold page title (32px on mobile), 20px semibold section headings. Monospace only for data: IPs, paths, methods. Tabular numerals for counts and durations.
+San Francisco via `-apple-system` (Inter / Segoe UI elsewhere), 14px body with -0.006em tracking. Large Title 34px bold (30px mobile) at -0.025em, panel headings 17px semibold (Apple "headline"). Monospace (SF Mono) only for data: IPs, paths, methods. Tabular numerals for counts and durations.
+
+## Utilities
+
+- `panel`: `--surface`, 18px radius, `--shadow-card` (a hairline ring in dark). Named `panel` because HeroUI already owns `.card`.
+- `glass`: `--glass` + `backdrop-filter: blur(24px) saturate(180%)`; solid under `prefers-reduced-transparency`.
+- `press`: scales to 0.97 on `:active` (off under reduced motion). On every tappable control.
 
 ## Components
 
-- **Tag**: 20px tall, 3px radius, tone bg + fg. Used for status codes, rules, server state, page status.
-- **Callout**: 6px radius, tinted ground, icon left. Red when an IP leads the last hour's incidents; gray otherwise.
-- **Database view**: HeroUI `Table` variant secondary, flattened: no radius, no fill, hairline row borders, header with icon + muted label, row hover tint.
+- **Tag**: 22px capsule, 12px medium, tone bg + fg. Status codes, rules, server state.
+- **Callout**: a panel with a 36px tinted circular icon (red when an IP leads the last hour's incidents, green when calm) and an accent link.
+- **Database view**: HeroUI `Table` inside a panel; 44px rows, 16px side padding, hairline separators (none under the last row), 12px semibold muted headers, no icons.
+- **Filters**: capsules. Active filter chip in blue tint with an ✕; toggles fill with the accent when pressed.
+- **Links**: "Ver todo ›" and inline actions in the accent color.
 
 ## Layout
 
-- **Sidebar** (240px, `--surface-secondary`, hairline right border): logo + collapse button; search (Ctrl/⌘ K, IP prefix or path substring → /solicitudes?q=); "Monitor" nav (Resumen, Incidentes, Solicitudes, IPs, Servidores; active = hover tint + medium weight); "Próximamente" items in `--n-faint` with a PRONTO marker; user card at the bottom opening a menu with Cerrar sesión. Collapsed state lives on `html[data-sidebar]`, set before paint. Under 768px it is an off-canvas drawer with a scrim.
-- **Topbar** (48px, sticky, hairline bottom): sidebar toggle, page icon + breadcrumb; right side Local/UTC clocks (lg+), live status dot + "Bajo ataque / Tranquilo", bell to Incidentes (red dot when hot), theme toggle (saved in localStorage, falls back to OS).
-- Content column max 1180px, 16px gutter on mobile, 32–48px above. Page header: 36px muted icon, 36px bold title, one-line description. Tables scroll horizontally inside their container; the page never does.
+- **Sidebar** (240px, floating 8px from the edges, 22px radius, `glass` + edge highlight): app-icon style logo (blue gradient squircle) + collapse button; search field (filled, focus ring; Ctrl/⌘ K, IP prefix or path substring → /solicitudes?q=); "Monitor" nav with accent icons, active item filled with the accent and white text; "Próximamente" items in `--n-faint` with a "Pronto" capsule; user row at the bottom opening a glass menu (pops in from the bottom) with Cerrar sesión. Collapsed state lives on `html[data-sidebar]`, set before paint. Under 768px it slides in as a drawer with a light scrim.
+- **Topbar** (56px, sticky, `glass`, fades out at its bottom edge instead of a hairline): sidebar toggle, page icon + breadcrumb (› separator); right side Local/UTC clocks (lg+), status capsule "Bajo ataque / Tranquilo" tinted red/green with the live dot, bell to Incidentes (red dot when hot), theme toggle. Icon buttons are circular.
+- Content column max 1180px, 16px gutter on mobile. Panels sit 12–16px apart. Tables scroll horizontally inside their panel; the page never does.
+- **Login**: one centered panel (26px radius, float shadow) with a 64px app icon, 44px rounded fields and a full-width accent button.
 
 ## Charts
 
@@ -39,8 +49,8 @@ System UI stack (Notion's own), 14px body, 40px bold page title (32px on mobile)
 - **HourlyBars** (traffic by status class, incidents per hour): 24 bars, stacked when multi-series, 2px gaps between segments, 4px rounded top on the top segment, 3 recessive gridlines, tooltip with the per-class breakdown and total on hover/focus.
 - **HourlyLines** (latency p50 blue / p95 red, validated pair): 2px lines on one ms axis, gaps where an hour has no data, isolated points drawn as 8px dots with a surface ring, crosshair + tooltip on hover/focus.
 - **BarList**: ranked rows with a 16%-opacity `--c-bar` fill behind the label, value right-aligned in muted tabular numerals; rows link to the filtered Solicitudes view.
-- **Stat strip** (Resumen): 6 plain figures (requests, error %, unique IPs, incidents, p95 latency, probes) between hairlines (26px semibold, muted label and hint), not cards.
+- **Stat widgets** (Resumen): 6 panels (requests, error %, unique IPs, incidents, p95 latency, probes), 28px semibold figures in SF Pro Rounded (`.rounded-num`, falls back to the system font off Apple), muted label and hint.
 
 ## Motion
 
-One moment: the live dot pulse (disabled under reduced motion). Data refreshes in place every 10s via `router.refresh()`, keeping filters and scroll.
+The live dot pulse; `press` feedback on tap; the user menu pops in (180ms, from its trigger); the mobile sidebar slides on an iOS sheet curve (`cubic-bezier(.32,.72,0,1)`, 300ms); theme changes ease the ground color. Pulse, pop and press are disabled under reduced motion. Data refreshes in place every 10s via `router.refresh()`, keeping filters and scroll.
