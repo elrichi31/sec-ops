@@ -31,7 +31,16 @@ System UI stack (Notion's own), 14px body, 40px bold page title (32px on mobile)
 
 ## Layout
 
-Sticky 44px topbar (breadcrumb left, live dot right). Content column max 1100px, 16px gutter on mobile, 48–96px on larger screens. Tables scroll horizontally inside their container; the page never does.
+- **Sidebar** (240px, `--surface-secondary`, hairline right border): logo + collapse button; search (Ctrl/⌘ K, IP prefix or path substring → /solicitudes?q=); "Monitor" nav (Resumen, Incidentes, Solicitudes, IPs, Servidores; active = hover tint + medium weight); "Próximamente" items in `--n-faint` with a PRONTO marker; user card at the bottom opening a menu with Cerrar sesión. Collapsed state lives on `html[data-sidebar]`, set before paint. Under 768px it is an off-canvas drawer with a scrim.
+- **Topbar** (48px, sticky, hairline bottom): sidebar toggle, page icon + breadcrumb; right side Local/UTC clocks (lg+), live status dot + "Bajo ataque / Tranquilo", bell to Incidentes (red dot when hot), theme toggle (saved in localStorage, falls back to OS).
+- Content column max 1180px, 16px gutter on mobile, 32–48px above. Page header: 36px muted icon, 36px bold title, one-line description. Tables scroll horizontally inside their container; the page never does.
+
+## Charts
+
+- Series colors `--c-2xx/3xx/4xx/5xx` are validated with the dataviz validator separately for light (#fff) and dark (#191919). The light 4xx amber is below 3:1 against white, so the chart always has a legend, per-bar tooltips with values, and an sr-only table.
+- **Traffic by hour**: 24 stacked bars, 2px gaps between segments, 4px rounded top on the top segment, 3 recessive gridlines, tooltip with the per-class breakdown and total on hover/focus.
+- **BarList**: ranked rows with a 16%-opacity `--c-bar` fill behind the label, value right-aligned in muted tabular numerals; rows link to the filtered Solicitudes view.
+- **Stat strip** (Resumen): 5 plain figures between hairlines (26px semibold, muted label and hint), not cards.
 
 ## Motion
 

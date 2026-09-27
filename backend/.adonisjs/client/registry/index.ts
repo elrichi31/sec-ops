@@ -18,6 +18,12 @@ const routes = {
     tokens: [{"old":"/api/dashboard","type":0,"val":"api","end":""},{"old":"/api/dashboard","type":0,"val":"dashboard","end":""}],
     types: placeholder as Registry['dashboard.summary']['types'],
   },
+  'dashboard.search': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/search',
+    tokens: [{"old":"/api/search","type":0,"val":"api","end":""},{"old":"/api/search","type":0,"val":"search","end":""}],
+    types: placeholder as Registry['dashboard.search']['types'],
+  },
   'auth.new_account.store': {
     methods: ["POST"],
     pattern: '/api/v1/auth/signup',

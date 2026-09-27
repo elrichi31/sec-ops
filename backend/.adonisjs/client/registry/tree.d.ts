@@ -7,6 +7,7 @@ export interface ApiDefinition {
   }
   dashboard: {
     summary: typeof routes['dashboard.summary']
+    search: typeof routes['dashboard.search']
   }
   auth: {
     newAccount: {

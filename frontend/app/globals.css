@@ -26,6 +26,13 @@
   --n-yellow-bg: #fbf3db; --n-yellow-fg: #95711f;
   --n-green-bg: #edf3ec;  --n-green-fg: #3f7658;
   --n-blue-bg: #e7f3f8;   --n-blue-fg: #2b6f98;
+
+  /* Chart series: HTTP status classes. Validated (dataviz validate_palette) on #fff. */
+  --c-2xx: #2e9e5e;
+  --c-3xx: #2f80d1;
+  --c-4xx: #d99a13;
+  --c-5xx: #d9496b;
+  --c-bar: #2f80d1;
 }
 
 .dark {
@@ -49,6 +56,13 @@
   --n-yellow-bg: #56452f; --n-yellow-fg: #dfbb6a;
   --n-green-bg: #243d30;  --n-green-fg: #7cc29a;
   --n-blue-bg: #143a4e;   --n-blue-fg: #7cb7e0;
+
+  /* Validated on #191919 */
+  --c-2xx: #349a5f;
+  --c-3xx: #4a8cc2;
+  --c-4xx: #b08c1c;
+  --c-5xx: #d9496b;
+  --c-bar: #4a8cc2;
 }
 
 html {
@@ -78,6 +92,12 @@ body {
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--n-faint) transparent;
+}
+
+@media (min-width: 768px) {
+  html[data-sidebar="collapsed"] .sidebar-panel {
+    display: none;
+  }
 }
 
 .tabular {

@@ -20,7 +20,10 @@ router.get('/', () => {
 router.post('/v1/logs', [controllers.Ingest, 'logs'])
 
 router
-  .get('/api/dashboard', [controllers.Dashboard, 'summary'])
+  .group(() => {
+    router.get('/api/dashboard', [controllers.Dashboard, 'summary'])
+    router.get('/api/search', [controllers.Dashboard, 'search'])
+  })
   .use(async ({ request, response }, next) => {
     if (request.header('authorization') !== `Bearer ${env.get('DASHBOARD_TOKEN').release()}`) {
       return response.unauthorized({ error: 'unauthorized' })
