@@ -46,6 +46,8 @@ processors:
           # needs accessLog.fields.headers.names.Cf-Connecting-Ip: keep (backend verifies the peer is Cloudflare)
           - set(attributes["cfConnectingIp"], attributes["request_Cf-Connecting-Ip"])
           - set(attributes["service"], attributes["ServiceName"])
+          # no router matched (scanners hitting the raw IP): show the Host they asked for
+          - set(attributes["service"], attributes["RequestHost"]) where attributes["ServiceName"] == nil
           - set(attributes["method"], attributes["RequestMethod"])
           - set(attributes["path"], attributes["RequestPath"])
           - set(attributes["statusCode"], Int(attributes["DownstreamStatus"]))
