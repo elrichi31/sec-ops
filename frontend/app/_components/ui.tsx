@@ -10,6 +10,18 @@ export const RULES: Record<string, { label: string; tone: Tone }> = {
   scan_404: { label: "Escaneo 404", tone: "orange" },
   sensitive_path_probe: { label: "Ruta sensible", tone: "red" },
   login_bruteforce: { label: "Fuerza bruta", tone: "yellow" },
+  attack_tool: { label: "Herramienta de ataque", tone: "orange" },
+  // attack types tagged per request (events.attack); exploit names double as incident rules
+  probe: { label: "Ruta sensible", tone: "red" },
+  scanner: { label: "Herramienta de ataque", tone: "orange" },
+  sqli: { label: "Inyección SQL", tone: "red" },
+  xss: { label: "XSS", tone: "red" },
+  lfi: { label: "Path traversal", tone: "red" },
+  cmdi: { label: "Inyección de comandos", tone: "red" },
+  log4shell: { label: "Log4Shell", tone: "red" },
+  ssti: { label: "Inyección de plantillas", tone: "red" },
+  ssrf: { label: "SSRF", tone: "red" },
+  crlf: { label: "Inyección CRLF", tone: "red" },
 };
 export const rule = (r: Val) => RULES[String(r)] ?? { label: String(r), tone: "gray" as Tone };
 

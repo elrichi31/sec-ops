@@ -1,15 +1,16 @@
 # Zenlor collector: reads proxy logs, normalizes to the Zenlor fields, ships OTLP/JSON.
-# Normalized attributes: source, service, host, clientIp, method, path, statusCode, durationMs
+# Normalized attributes: source, service, host, clientIp, method, path (with query), statusCode, durationMs, userAgent
 # Missing log files are fine: that receiver just stays idle.
 #
 # Nginx needs a JSON access log (CF-Connecting-IP is trusted only from Cloudflare peers, checked in the backend):
 #   log_format zenlor escape=json '{"time":"$time_iso8601","remote_addr":"$remote_addr",'
-#     '"host":"$host","method":"$request_method","uri":"$uri","status":$status,"request_time":$request_time,'
-#     '"cf_connecting_ip":"$http_cf_connecting_ip"}';
+#     '"host":"$host","method":"$request_method","uri":"$request_uri","status":$status,"request_time":$request_time,'
+#     '"cf_connecting_ip":"$http_cf_connecting_ip","user_agent":"$http_user_agent"}';
 #   access_log /var/log/nginx/zenlor.json.log zenlor;
 #
 # Traefik needs: --accesslog=true --accesslog.format=json --accesslog.filepath=/var/log/traefik/access.log
 #   --accesslog.fields.headers.names.Cf-Connecting-Ip=keep   (real client IP behind Cloudflare)
+#   --accesslog.fields.headers.names.User-Agent=keep         (attack tool detection)
 
 receivers:
   file_log/nginx:
@@ -37,6 +38,7 @@ processors:
           - set(attributes["cfConnectingIp"], attributes["cf_connecting_ip"])
           - set(attributes["service"], attributes["host"])
           - set(attributes["path"], attributes["uri"])
+          - set(attributes["userAgent"], attributes["user_agent"])
           - set(attributes["statusCode"], Int(attributes["status"]))
           - set(attributes["durationMs"], Int(Double(attributes["request_time"]) * 1000))
       - context: log
@@ -50,6 +52,7 @@ processors:
           - set(attributes["host"], attributes["RequestHost"])
           - set(attributes["method"], attributes["RequestMethod"])
           - set(attributes["path"], attributes["RequestPath"])
+          - set(attributes["userAgent"], attributes["request_User-Agent"])
           - set(attributes["statusCode"], Int(attributes["DownstreamStatus"]))
           - set(attributes["durationMs"], Int(attributes["Duration"] / 1000000))
   batch:

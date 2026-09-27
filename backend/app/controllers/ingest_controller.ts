@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import db from '@adonisjs/lucid/services/db'
 import { resolveClientIp } from '#services/client_ip'
+import { classifyRequest } from '#services/attack_classifier'
 import type { HttpContext } from '@adonisjs/core/http'
 
 type OtlpValue = { stringValue?: string; intValue?: string | number; doubleValue?: number }
@@ -34,6 +35,8 @@ export default class IngestController {
         for (const rec of sl.logRecords ?? []) {
           const a = { ...resource, ...flatten(rec.attributes) }
           const nanos = rec.timeUnixNano ?? rec.observedTimeUnixNano
+          const path = str(a.path)
+          const userAgent = str(a.userAgent, 512)
           rows.push({
             ts: nanos && nanos !== '0' ? new Date(Number(BigInt(nanos) / 1_000_000n)) : new Date(),
             server_id: server.id,
@@ -42,9 +45,11 @@ export default class IngestController {
             host: str(a.host, 255),
             client_ip: resolveClientIp(str(a.clientIp, 64), str(a.cfConnectingIp, 64)),
             method: str(a.method, 16),
-            path: str(a.path),
+            path,
             status_code: int(a.statusCode),
             duration_ms: int(a.durationMs),
+            user_agent: userAgent,
+            attack: classifyRequest(path, userAgent),
           })
         }
       }

@@ -234,6 +234,7 @@ export function EventsView({ data, fetchedAt, q, results }: { data: Summary; fet
             { key: "status_code", label: "Código", render: (r) => (r.status_code == null ? "—" : <Tag tone={statusTone(Number(r.status_code))}>{String(r.status_code)}</Tag>) },
             { key: "method", label: "Método", render: (r) => <Mono>{r.method}</Mono> },
             { key: "path", label: "Ruta", render: (r) => <span className="mono block max-w-[340px] truncate" title={String(r.path ?? "")}>{r.path ?? "—"}</span> },
+            { key: "attack", label: "Ataque", render: (r) => (r.attack ? <Tag tone={rule(r.attack).tone}>{rule(r.attack).label}</Tag> : "—") },
             { key: "client_ip", label: "IP", render: (r) => <Mono>{r.client_ip}</Mono> },
             { key: "service", label: "Servicio", render: (r) =>
               r.service ? <span title={String(r.service)}>{serviceName(r.service)}</span>

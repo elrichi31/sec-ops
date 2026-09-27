@@ -1,19 +1,19 @@
 import db from '@adonisjs/lucid/services/db'
 import logger from '@adonisjs/core/services/logger'
 import env from '#start/env'
+import { EXPLOITS } from '#services/attack_classifier'
 
 /**
  * Each rule is a WHERE clause + threshold over the last minute of events,
  * grouped by (server, ip). Same rule+ip won't re-fire for 10 minutes.
+ * `attack` is tagged at ingest; every exploit type is its own rule so alerts say what it was.
  */
 const RULES = [
   { name: 'scan_404', where: `status_code = 404`, min: 20 },
-  {
-    name: 'sensitive_path_probe',
-    where: `path ~* '(/\\.env|/\\.git|/wp-admin|/wp-login\\.php|/phpmyadmin|/\\.aws|/config\\.php)'`,
-    min: 1,
-  },
+  { name: 'sensitive_path_probe', where: `attack = 'probe'`, min: 1 },
   { name: 'login_bruteforce', where: `status_code IN (401, 403) AND path ILIKE '%login%'`, min: 10 },
+  { name: 'attack_tool', where: `attack = 'scanner'`, min: 1 },
+  ...EXPLOITS.map((name) => ({ name, where: `attack = '${name}'`, min: 1 })),
 ]
 
 async function notify(text: string) {
