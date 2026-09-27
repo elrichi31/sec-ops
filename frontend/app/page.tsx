@@ -1,3 +1,6 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import Dashboard, { type Summary } from "./dashboard";
 
 export const dynamic = "force-dynamic";
@@ -12,5 +15,8 @@ async function getSummary(): Promise<Summary> {
 }
 
 export default async function Home() {
-  return <Dashboard data={await getSummary()} fetchedAt={new Date().toISOString()} />;
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect("/login");
+
+  return <Dashboard data={await getSummary()} fetchedAt={new Date().toISOString()} user={session.user.email} />;
 }

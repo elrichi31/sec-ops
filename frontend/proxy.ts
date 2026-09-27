@@ -1,18 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
 
-// ponytail: single shared Basic Auth login; move to real users/sessions when there are customers
+// Optimistic cookie check only; the page validates the session against the DB.
 export function proxy(request: NextRequest) {
-  const user = process.env.DASHBOARD_USER;
-  const pass = process.env.DASHBOARD_PASSWORD;
-  const expected = user && pass ? `Basic ${btoa(`${user}:${pass}`)}` : null;
-
-  if (expected && request.headers.get("authorization") === expected) {
-    return NextResponse.next();
+  if (!getSessionCookie(request)) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
-  return new NextResponse("Authentication required", {
-    status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Zenlor"' },
-  });
+  return NextResponse.next();
 }
 
-export const config = { matcher: "/((?!_next/static|favicon.ico).*)" };
+export const config = { matcher: "/((?!api/auth|login|_next/static|_next/image|favicon.ico).*)" };

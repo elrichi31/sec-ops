@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Table, Tabs } from "@heroui/react";
+import { authClient } from "@/lib/auth-client";
 import {
   Activity,
   CircleAlert,
   Clock,
   Globe,
+  LogOut,
   Hash,
   Server,
   ShieldCheck,
@@ -165,7 +167,7 @@ function TrafficBar({ statuses }: { statuses: Row[] }) {
   );
 }
 
-export default function Dashboard({ data, fetchedAt }: { data: Summary; fetchedAt: string }) {
+export default function Dashboard({ data, fetchedAt, user }: { data: Summary; fetchedAt: string; user: string }) {
   const router = useRouter();
   const [onlyErrors, setOnlyErrors] = useState(false);
   const now = new Date(fetchedAt).getTime();
@@ -205,10 +207,24 @@ export default function Dashboard({ data, fetchedAt }: { data: Summary; fetchedA
           <span aria-hidden>/</span>
           <span className="truncate text-(--foreground)">Security Monitor</span>
         </nav>
-        <span className="inline-flex shrink-0 items-center gap-2 text-[13px] text-(--muted)">
-          <span className="live-dot size-1.5 rounded-full bg-(--n-green-fg)" aria-hidden />
-          En vivo · cada {REFRESH_MS / 1000}s
-        </span>
+        <div className="flex shrink-0 items-center gap-4 text-[13px] text-(--muted)">
+          <span className="inline-flex items-center gap-2">
+            <span className="live-dot size-1.5 rounded-full bg-(--n-green-fg)" aria-hidden />
+            <span className="hidden sm:inline">En vivo · cada {REFRESH_MS / 1000}s</span>
+          </span>
+          <span className="hidden truncate md:inline" title={user}>{user}</span>
+          <button
+            type="button"
+            onClick={async () => {
+              await authClient.signOut();
+              router.replace("/login");
+            }}
+            className="inline-flex items-center gap-1.5 rounded-[4px] px-1.5 py-1 transition-colors hover:bg-(--n-hover) hover:text-(--foreground)"
+          >
+            <LogOut size={14} strokeWidth={1.75} aria-hidden />
+            Salir
+          </button>
+        </div>
       </header>
 
       <main className="mx-auto w-full max-w-[1100px] px-4 pb-24 sm:px-12 lg:px-24">
