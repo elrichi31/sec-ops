@@ -17,6 +17,7 @@ services:
 
   backend:
     build: ./backend
+    networks: [default, dokploy-network]
     restart: unless-stopped
     depends_on:
       postgres: { condition: service_healthy }
@@ -37,6 +38,7 @@ services:
 
   frontend:
     build: ./frontend
+    networks: [default, dokploy-network]
     restart: unless-stopped
     depends_on: [backend]
     environment:
@@ -62,3 +64,7 @@ services:
 
 volumes:
   pgdata:
+
+networks:
+  dokploy-network:
+    external: true
