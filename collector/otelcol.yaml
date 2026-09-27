@@ -25,13 +25,6 @@ receivers:
       - type: json_parser
         timestamp: { parse_from: attributes.time, layout_type: gotime, layout: "2006-01-02T15:04:05Z07:00" }
 
-  file_log/docker:
-    include: [/var/lib/docker/containers/*/*-json.log]
-    attributes: { source: docker }
-    operators:
-      - type: container
-        format: docker
-
 processors:
   transform:
     error_mode: ignore
@@ -53,11 +46,6 @@ processors:
           - set(attributes["path"], attributes["RequestPath"])
           - set(attributes["statusCode"], Int(attributes["DownstreamStatus"]))
           - set(attributes["durationMs"], Int(attributes["Duration"] / 1000000))
-      - context: log
-        conditions: ['attributes["source"] == "docker"']
-        statements:
-          # ponytail: service = container log path (container id); map to names via docker API when needed
-          - set(attributes["service"], attributes["log.file.path"])
   batch:
     timeout: 5s
 
@@ -72,6 +60,6 @@ exporters:
 service:
   pipelines:
     logs:
-      receivers: [file_log/nginx, file_log/traefik, file_log/docker]
+      receivers: [file_log/nginx, file_log/traefik]
       processors: [transform, batch]
       exporters: [otlp_http]

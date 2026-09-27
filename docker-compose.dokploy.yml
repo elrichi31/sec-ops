@@ -47,7 +47,7 @@ services:
       DASHBOARD_USER: ${DASHBOARD_USER}
       DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
 
-  # Monitors this same VM: reads Dokploy's Traefik access log + container logs.
+  # Monitors this same VM: reads Dokploy's Traefik access log.
   collector:
     image: otel/opentelemetry-collector-contrib:latest
     restart: unless-stopped
@@ -60,7 +60,6 @@ services:
     volumes:
       - ./collector/otelcol.yaml:/etc/zenlor/otelcol.yaml:ro
       - /etc/dokploy/traefik/dynamic:/logs/traefik:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
 
 volumes:
   pgdata:
