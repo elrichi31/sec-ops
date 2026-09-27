@@ -93,7 +93,7 @@ export default class DashboardController {
     }
   }
 
-  /** Search recent events by IP prefix or path substring (sidebar search). */
+  /** Search recent events by IP prefix, host or path substring (sidebar search). */
   async search({ request }: HttpContext) {
     const q = String(request.input('q', '')).trim().slice(0, 200)
     if (!q) return []
@@ -101,7 +101,12 @@ export default class DashboardController {
       .from('events')
       .join('servers', 'servers.id', 'events.server_id')
       .select('events.*', 'servers.name as server')
-      .where((w) => w.where('events.client_ip', 'like', `${q}%`).orWhere('events.path', 'ilike', `%${q}%`))
+      .where((w) =>
+        w
+          .where('events.client_ip', 'like', `${q}%`)
+          .orWhere('events.host', 'ilike', `%${q}%`)
+          .orWhere('events.path', 'ilike', `%${q}%`)
+      )
       .orderBy('events.ts', 'desc')
       .limit(200)
   }
