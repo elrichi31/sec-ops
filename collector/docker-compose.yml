@@ -14,3 +14,5 @@ services:
       - ./otelcol.yaml:/etc/zenlor/otelcol.yaml:ro
       - /var/log/nginx:/logs/nginx:ro
       - /var/log/traefik:/logs/traefik:ro
+      - /:/hostfs:ro  # host metrics (CPU, RAM, disk)
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # per-container stats

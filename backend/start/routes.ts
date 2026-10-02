@@ -18,11 +18,13 @@ router.get('/', () => {
 
 // OTLP/HTTP logs endpoint; the collector's otlp_http exporter appends /v1/logs
 router.post('/v1/logs', [controllers.Ingest, 'logs'])
+router.post('/v1/metrics', [controllers.Ingest, 'metrics'])
 
 router
   .group(() => {
     router.get('/api/dashboard', [controllers.Dashboard, 'summary'])
     router.get('/api/search', [controllers.Dashboard, 'search'])
+    router.get('/api/monitoring', [controllers.Dashboard, 'monitoring'])
   })
   .use(async ({ request, response }, next) => {
     if (request.header('authorization') !== `Bearer ${env.get('DASHBOARD_TOKEN').release()}`) {

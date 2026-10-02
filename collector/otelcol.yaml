@@ -27,6 +27,33 @@ receivers:
       - type: json_parser
         timestamp: { parse_from: attributes.time, layout_type: gotime, layout: "2006-01-02T15:04:05Z07:00" }
 
+  # CPU, RAM, load and root disk of the host (needs the host's / mounted at /hostfs)
+  hostmetrics:
+    collection_interval: 30s
+    root_path: /hostfs
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.time: { enabled: false }
+          system.cpu.utilization: { enabled: true }
+      memory:
+        metrics:
+          system.memory.limit: { enabled: true }
+      load: {}
+      filesystem:
+        include_mount_points: { mount_points: ["/"], match_type: strict }
+
+  # CPU and RAM per container (needs /var/run/docker.sock mounted).
+  # api_version 1.44 = Docker 25+; Docker 29 rejects the receiver's older default.
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    collection_interval: 30s
+    api_version: "1.44"
+    metrics:
+      container.cpu.utilization: { enabled: true }
+      container.memory.usage.total: { enabled: true }
+      container.memory.usage.limit: { enabled: true }
+
 processors:
   transform:
     error_mode: ignore
@@ -71,4 +98,7 @@ service:
     logs:
       receivers: [file_log/nginx, file_log/traefik]
       processors: [transform, batch]
+      exporters: [otlp_http]
+    metrics:
+      receivers: [hostmetrics, docker_stats]
       exporters: [otlp_http]

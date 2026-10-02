@@ -17,6 +17,8 @@ export type Summary = {
   totals: Row;
 };
 
+export type Monitoring = { latest: Row[]; hourly: Row[]; containers: Row[] };
+
 async function api<T>(path: string): Promise<T> {
   const res = await fetch(`${process.env.API_URL}${path}`, {
     headers: { authorization: `Bearer ${process.env.DASHBOARD_TOKEN}` },
@@ -28,3 +30,4 @@ async function api<T>(path: string): Promise<T> {
 
 export const getSummary = () => api<Summary>("/api/dashboard");
 export const searchEvents = (q: string) => api<Row[]>(`/api/search?q=${encodeURIComponent(q)}`);
+export const getMonitoring = () => api<Monitoring>("/api/monitoring");

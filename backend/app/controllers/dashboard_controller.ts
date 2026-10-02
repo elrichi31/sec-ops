@@ -110,4 +110,25 @@ export default class DashboardController {
       .orderBy('events.ts', 'desc')
       .limit(200)
   }
+
+  /** Latest host snapshot per server, 24 hourly CPU/RAM averages (zero-filled with nulls), live containers. */
+  async monitoring({}: HttpContext) {
+    const [latest, hourly, containers] = await Promise.all([
+      db.rawQuery(`SELECT DISTINCT ON (server_id) * FROM host_metrics ORDER BY server_id, ts DESC`),
+      db.rawQuery(
+        `SELECT s.id AS server_id, h AS hour,
+                round(avg(m.cpu_pct)::numeric, 1) AS cpu,
+                round(avg(100.0 * m.mem_used / nullif(m.mem_total, 0))::numeric, 1) AS mem
+         FROM servers s
+         CROSS JOIN generate_series(date_trunc('hour', now()) - interval '23 hours', date_trunc('hour', now()), interval '1 hour') h
+         LEFT JOIN host_metrics m ON m.server_id = s.id AND m.ts >= h AND m.ts < h + interval '1 hour'
+         GROUP BY s.id, h ORDER BY s.id, h`
+      ),
+      db
+        .from('container_metrics')
+        .where('ts', '>', new Date(Date.now() - 5 * 60_000))
+        .orderBy('mem_used', 'desc'),
+    ])
+    return { latest: latest.rows, hourly: hourly.rows, containers }
+  }
 }

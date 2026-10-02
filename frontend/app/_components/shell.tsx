@@ -7,6 +7,7 @@ import {
   Bell,
   Cable,
   ChevronsUpDown,
+  Gauge,
   Globe,
   Hash,
   LayoutGrid,
@@ -32,6 +33,7 @@ export const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/solicitudes", label: "Solicitudes", icon: Globe },
   { href: "/ips", label: "IPs", icon: Hash },
   { href: "/servidores", label: "Servidores", icon: Server },
+  { href: "/monitoreo", label: "Monitoreo", icon: Gauge },
 ];
 
 const SOON: { label: string; icon: LucideIcon }[] = [

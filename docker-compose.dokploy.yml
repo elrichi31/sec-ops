@@ -65,6 +65,8 @@ services:
     volumes:
       - ./collector/otelcol.yaml:/etc/zenlor/otelcol.yaml:ro
       - /etc/dokploy/traefik/dynamic:/logs/traefik:ro
+      - /:/hostfs:ro  # host metrics (CPU, RAM, disk)
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # per-container stats
 
 volumes:
   pgdata:
