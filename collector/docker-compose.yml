@@ -1,6 +1,7 @@
 # Install on any monitored server:
 #   ZENLOR_ENDPOINT=https://central.example.com ZENLOR_INGEST_KEY=zsm_... docker compose up -d
 # Adjust the log mounts to where this server's proxy writes its logs.
+# Dokploy servers: also set TRAEFIK_LOGS=/etc/dokploy/traefik/dynamic
 services:
   zenlor-collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -13,6 +14,6 @@ services:
     volumes:
       - ./otelcol.yaml:/etc/zenlor/otelcol.yaml:ro
       - /var/log/nginx:/logs/nginx:ro
-      - /var/log/traefik:/logs/traefik:ro
+      - ${TRAEFIK_LOGS:-/var/log/traefik}:/logs/traefik:ro
       - /:/hostfs:ro  # host metrics (CPU, RAM, disk)
       - /var/run/docker.sock:/var/run/docker.sock:ro  # per-container stats
