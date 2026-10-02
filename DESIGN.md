@@ -49,6 +49,7 @@ San Francisco via `-apple-system` (Inter / Segoe UI elsewhere), 14px body with -
 - **HourlyBars** (traffic by status class, incidents per hour): 24 bars, stacked when multi-series, 2px gaps between segments, 4px rounded top on the top segment, 3 recessive gridlines, tooltip with the per-class breakdown and total on hover/focus.
 - **HourlyLines** (latency p50 blue / p95 red, validated pair): 2px lines on one ms axis, gaps where an hour has no data, isolated points drawn as 8px dots with a surface ring, crosshair + tooltip on hover/focus.
 - **BarList**: ranked rows with a 16%-opacity `--c-bar` fill behind the label, value right-aligned in muted tabular numerals; rows link to the filtered Solicitudes view.
+- **Monitoreo**: a grid of server cards (live dot, CPU/Memoria/Disco bars, cores · RAM · container count; selected = 2px accent ring) opens one server below: 4 tiles (28px rounded figure + usage bar), CPU/memory HourlyLines, and a container list sortable by Memoria/CPU through an iOS segmented control. Usage bars are green, orange from 75 %, red from 90 %.
 - **Stat widgets** (Resumen): 6 panels (requests, error %, unique IPs, incidents, p95 latency, probes), 28px semibold figures in SF Pro Rounded (`.rounded-num`, falls back to the system font off Apple), muted label and hint.
 
 ## Motion

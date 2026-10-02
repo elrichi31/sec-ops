@@ -19,6 +19,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ingest_controller').default['logs']>>>
     }
   }
+  'ingest.metrics': {
+    methods: ["POST"]
+    pattern: '/v1/metrics'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ingest_controller').default['metrics']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ingest_controller').default['metrics']>>>
+    }
+  }
   'dashboard.summary': {
     methods: ["GET","HEAD"]
     pattern: '/api/dashboard'
@@ -41,6 +53,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/dashboard_controller').default['search']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/dashboard_controller').default['search']>>>
+    }
+  }
+  'dashboard.monitoring': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/monitoring'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/dashboard_controller').default['monitoring']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/dashboard_controller').default['monitoring']>>>
     }
   }
   'auth.new_account.store': {

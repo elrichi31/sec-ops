@@ -5,8 +5,10 @@ type ParamValue = string | number | bigint | boolean
 export type ScannedRoutes = {
   ALL: {
     'ingest.logs': { paramsTuple?: []; params?: {} }
+    'ingest.metrics': { paramsTuple?: []; params?: {} }
     'dashboard.summary': { paramsTuple?: []; params?: {} }
     'dashboard.search': { paramsTuple?: []; params?: {} }
+    'dashboard.monitoring': { paramsTuple?: []; params?: {} }
     'auth.new_account.store': { paramsTuple?: []; params?: {} }
     'auth.access_tokens.store': { paramsTuple?: []; params?: {} }
     'profile.profile.show': { paramsTuple?: []; params?: {} }
@@ -15,15 +17,18 @@ export type ScannedRoutes = {
   GET: {
     'dashboard.summary': { paramsTuple?: []; params?: {} }
     'dashboard.search': { paramsTuple?: []; params?: {} }
+    'dashboard.monitoring': { paramsTuple?: []; params?: {} }
     'profile.profile.show': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
     'dashboard.summary': { paramsTuple?: []; params?: {} }
     'dashboard.search': { paramsTuple?: []; params?: {} }
+    'dashboard.monitoring': { paramsTuple?: []; params?: {} }
     'profile.profile.show': { paramsTuple?: []; params?: {} }
   }
   POST: {
     'ingest.logs': { paramsTuple?: []; params?: {} }
+    'ingest.metrics': { paramsTuple?: []; params?: {} }
     'auth.new_account.store': { paramsTuple?: []; params?: {} }
     'auth.access_tokens.store': { paramsTuple?: []; params?: {} }
     'profile.access_tokens.destroy': { paramsTuple?: []; params?: {} }

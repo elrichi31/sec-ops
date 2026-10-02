@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Activity, ArrowRightLeft, Box, Cpu, MemoryStick, CircleAlert, CircleCheck, Clock, Gauge, Globe, Hash, LayoutGrid, Radio, Route, Server, ShieldAlert, ShieldCheck, Swords, Timer, X } from "lucide-react";
-import type { Monitoring, Summary } from "@/lib/api";
-import { BarList, HourlyBars, HourlyLines, INCIDENT_SERIES, LATENCY_SERIES, Legend, STATUS_SERIES, type Series } from "./charts";
+import { Activity, ArrowRightLeft, Box, CircleAlert, CircleCheck, Clock, Globe, Hash, LayoutGrid, Radio, Route, Server, ShieldAlert, ShieldCheck, Swords, Timer, X } from "lucide-react";
+import type { Summary } from "@/lib/api";
+import { BarList, HourlyBars, HourlyLines, INCIDENT_SERIES, LATENCY_SERIES, Legend, STATUS_SERIES } from "./charts";
 import { Topbar } from "./shell";
 import {
   Database,
@@ -14,7 +14,6 @@ import {
   Tag,
   When,
   isOnline,
-  ONLINE_MS,
   nf,
   rule,
   serviceName,
@@ -23,10 +22,10 @@ import {
   type Row,
 } from "./ui";
 
-const hotCount = (d: Summary, now: number) =>
+export const hotCount = (d: Summary, now: number) =>
   d.incidents.filter((i) => now - new Date(String(i.created_at)).getTime() < HOT_MS).length;
 
-function Section({ title, action, children, className = "" }: { title: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
+export function Section({ title, action, children, className = "" }: { title: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
     <section className={`panel p-4 sm:p-5 ${className}`}>
       <div className="mb-3 flex items-baseline justify-between gap-3">
@@ -309,122 +308,6 @@ export function ServersView({ data, fetchedAt }: { data: Summary; fetchedAt: str
             { key: "last_seen_at", label: "Último evento", icon: Clock, render: (r) => <When ts={r.last_seen_at} now={now} /> },
           ]}
         />
-      </main>
-    </>
-  );
-}
-
-/* ---------- Monitoreo ---------- */
-
-const HOST_SERIES: Series[] = [
-  { key: "cpu", label: "CPU", color: "var(--c-3xx)" },
-  { key: "mem", label: "RAM", color: "var(--c-4xx)" },
-];
-
-const gb = (b: number) =>
-  b < 1024 ** 3 ? `${nf.format(Math.round(b / 1024 ** 2))} MB` : `${nf.format(Math.round((b / 1024 ** 3) * 10) / 10)} GB`;
-
-/** Usage bar that turns orange past 75 % and red past 90 %. */
-function Meter({ label, pct, detail }: { label: string; pct: number | null; detail: string }) {
-  const tone = pct == null ? "gray" : pct >= 90 ? "red" : pct >= 75 ? "orange" : "green";
-  return (
-    <div className="min-w-0">
-      <div className="flex items-baseline justify-between gap-2">
-        <p className="text-[13px] font-medium text-(--muted)">{label}</p>
-        <p className="rounded-num tabular text-[22px] leading-none font-semibold tracking-[-0.02em]" style={tone === "gray" || tone === "green" ? undefined : { color: `var(--n-${tone}-fg)` }}>
-          {pct == null ? "—" : `${Math.round(pct)}%`}
-        </p>
-      </div>
-      <div className="mt-2 h-2 overflow-hidden rounded-full bg-(--n-gray-bg)" role="meter" aria-label={label} aria-valuenow={pct ?? undefined} aria-valuemin={0} aria-valuemax={100}>
-        <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${Math.min(100, pct ?? 0)}%`, background: `var(--n-${tone}-fg)` }} />
-      </div>
-      <p className="mt-1.5 truncate text-[12.5px] text-(--muted)">{detail}</p>
-    </div>
-  );
-}
-
-function ContainerTable({ rows }: { rows: Row[] }) {
-  const max = Math.max(1, ...rows.map((r) => Number(r.mem_used ?? 0)));
-  return (
-    <Database
-      label="Contenedores"
-      rows={rows.map((r) => ({ ...r, id: r.name }))}
-      empty="Sin datos de contenedores. El collector necesita /var/run/docker.sock montado."
-      cols={[
-        { key: "name", label: "Contenedor", icon: Box, render: (r) => (
-          <span className="block max-w-[320px] truncate" title={String(r.image ?? "")}>
-            <span className="mono">{r.name}</span>
-            {r.image && <span className="ml-2 text-[12px] text-(--muted)">{r.image}</span>}
-          </span>
-        ) },
-        // docker stats style: 100 % = one full core
-        { key: "cpu_pct", label: "CPU", icon: Cpu, align: "right", render: (r) => (r.cpu_pct == null ? "—" : <span className="tabular">{nf.format(Math.round(Number(r.cpu_pct) * 10) / 10)}%</span>) },
-        { key: "mem_used", label: "RAM", icon: MemoryStick, render: (r) => (
-          <span className="flex items-center gap-3">
-            <span className="tabular w-20 text-right">{r.mem_used == null ? "—" : gb(Number(r.mem_used))}</span>
-            <span className="h-2 w-20 overflow-hidden rounded-full bg-(--n-gray-bg) sm:w-40">
-              <span className="block h-full rounded-full bg-(--c-bar)" style={{ width: `${(Number(r.mem_used ?? 0) / max) * 100}%` }} />
-            </span>
-          </span>
-        ) },
-      ]}
-    />
-  );
-}
-
-export function MonitoringView({ data, monitoring, fetchedAt }: { data: Summary; monitoring: Monitoring; fetchedAt: string }) {
-  const now = new Date(fetchedAt).getTime();
-  return (
-    <>
-      <Topbar page="Monitoreo" icon={Gauge} hot={hotCount(data, now)} />
-      <main className="w-full px-4 pb-24 sm:px-6">
-        <PageTitle title="Monitoreo" description="CPU, RAM, carga, disco y contenedores de cada servidor. Se actualiza cada 30 segundos." />
-        {!data.servers.length && <p className="py-6 text-sm text-(--muted)">Ningún servidor registrado.</p>}
-        <div className="flex flex-col gap-4">
-          {data.servers.map((s) => {
-            const m = monitoring.latest.find((r) => r.server_id === s.id);
-            const n = (k: string) => (m?.[k] == null ? null : Number(m[k]));
-            const pct = (a: number | null, b: number | null) => (a == null || !b ? null : (a / b) * 100);
-            const cpus = n("cpus");
-            const load = [n("load1"), n("load5"), n("load15")];
-            const fresh = m && now - new Date(String(m.ts)).getTime() < ONLINE_MS;
-            return (
-              <Section
-                key={String(s.id)}
-                title={String(s.name)}
-                action={m ? <span className="text-[13px] text-(--muted)">{fresh ? <Tag tone="green">En línea</Tag> : <Tag tone="gray">Sin señal</Tag>} <When ts={m.ts} now={now} /></span> : undefined}
-              >
-                {m ? (
-                  <>
-                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                      <Meter label="CPU" pct={n("cpu_pct")} detail={cpus ? `${cpus} núcleo${cpus === 1 ? "" : "s"}` : "—"} />
-                      <Meter label="RAM" pct={pct(n("mem_used"), n("mem_total"))} detail={n("mem_total") ? `${gb(n("mem_used") ?? 0)} de ${gb(n("mem_total")!)}` : "—"} />
-                      <Meter label="Disco /" pct={pct(n("disk_used"), n("disk_total"))} detail={n("disk_total") ? `${gb(n("disk_used") ?? 0)} de ${gb(n("disk_total")!)}` : "—"} />
-                      <Meter
-                        label="Carga 1 min"
-                        pct={pct(load[0], cpus)}
-                        detail={load[0] == null ? "—" : `${load.map((l) => (l == null ? "—" : l.toFixed(2))).join(" · ")} (1 · 5 · 15 min)`}
-                      />
-                    </div>
-                    <div className="mt-6 flex items-baseline justify-between gap-3">
-                      <h3 className="text-[15px] font-semibold">Últimas 24 h · promedio por hora</h3>
-                      <Legend series={HOST_SERIES} />
-                    </div>
-                    <div className="pt-10">
-                      <HourlyLines rows={monitoring.hourly.filter((r) => r.server_id === s.id)} series={HOST_SERIES} caption={`CPU y RAM por hora en ${s.name}`} unit="%" height={140} />
-                    </div>
-                    <h3 className="mt-6 mb-3 text-[15px] font-semibold">Contenedores · por RAM</h3>
-                    <ContainerTable rows={monitoring.containers.filter((c) => c.server_id === s.id)} />
-                  </>
-                ) : (
-                  <p className="py-4 text-sm text-(--muted)">
-                    Sin métricas todavía. Actualiza el collector de este servidor (nuevo <span className="mono">otelcol.yaml</span> y el volumen <span className="mono">/:/hostfs:ro</span>).
-                  </p>
-                )}
-              </Section>
-            );
-          })}
-        </div>
       </main>
     </>
   );

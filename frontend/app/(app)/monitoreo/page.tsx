@@ -1,5 +1,5 @@
 import { getMonitoring, getSummary } from "@/lib/api";
-import { MonitoringView } from "../../_components/views";
+import { MonitoringView } from "../../_components/monitoring";
 
 export const dynamic = "force-dynamic";
 

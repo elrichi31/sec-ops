@@ -44,6 +44,10 @@ services:
       backend: { condition: service_started }
       postgres: { condition: service_healthy }
     environment:
+      # Must match the viewers' zone: SSR formats hours/dates, and a mismatch with the
+      # browser breaks hydration (React then re-renders <html> and drops the dark class).
+      # ponytail: one zone for all viewers; pass the browser's zone per request if viewers span zones
+      TZ: ${DASHBOARD_TZ:-America/Bogota}
       API_URL: http://backend:3333
       DASHBOARD_TOKEN: ${DASHBOARD_TOKEN}
       DATABASE_URL: postgres://zenlor:${DB_PASSWORD}@postgres:5432/zenlor

@@ -12,6 +12,12 @@ const routes = {
     tokens: [{"old":"/v1/logs","type":0,"val":"v1","end":""},{"old":"/v1/logs","type":0,"val":"logs","end":""}],
     types: placeholder as Registry['ingest.logs']['types'],
   },
+  'ingest.metrics': {
+    methods: ["POST"],
+    pattern: '/v1/metrics',
+    tokens: [{"old":"/v1/metrics","type":0,"val":"v1","end":""},{"old":"/v1/metrics","type":0,"val":"metrics","end":""}],
+    types: placeholder as Registry['ingest.metrics']['types'],
+  },
   'dashboard.summary': {
     methods: ["GET","HEAD"],
     pattern: '/api/dashboard',
@@ -23,6 +29,12 @@ const routes = {
     pattern: '/api/search',
     tokens: [{"old":"/api/search","type":0,"val":"api","end":""},{"old":"/api/search","type":0,"val":"search","end":""}],
     types: placeholder as Registry['dashboard.search']['types'],
+  },
+  'dashboard.monitoring': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/monitoring',
+    tokens: [{"old":"/api/monitoring","type":0,"val":"api","end":""},{"old":"/api/monitoring","type":0,"val":"monitoring","end":""}],
+    types: placeholder as Registry['dashboard.monitoring']['types'],
   },
   'auth.new_account.store': {
     methods: ["POST"],

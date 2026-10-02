@@ -4,10 +4,12 @@ import type { routes } from './index.ts'
 export interface ApiDefinition {
   ingest: {
     logs: typeof routes['ingest.logs']
+    metrics: typeof routes['ingest.metrics']
   }
   dashboard: {
     summary: typeof routes['dashboard.summary']
     search: typeof routes['dashboard.search']
+    monitoring: typeof routes['dashboard.monitoring']
   }
   auth: {
     newAccount: {

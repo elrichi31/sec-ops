@@ -108,7 +108,9 @@ function Tooltip({ point, series, index, count, unit = "", total }: { point: Poi
 
 function SrTable({ caption, points, series }: { caption: string; points: Point[]; series: Series[] }) {
   return (
-    <table className="sr-only">
+    // sr-only on a wrapper: a <table> ignores the 1px height and would stretch the page
+    <div className="sr-only">
+    <table>
       <caption>{caption}</caption>
       <thead>
         <tr>
@@ -125,6 +127,7 @@ function SrTable({ caption, points, series }: { caption: string; points: Point[]
         ))}
       </tbody>
     </table>
+    </div>
   );
 }
 
